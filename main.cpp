@@ -28,38 +28,39 @@ std::unique_ptr<Command> CreatCommand(std::string type) {
   if(type == "delete") {
     return std::make_unique<DeleteUser>();
   }
-  /*
+  if(type == "select") {
+    return std::make_unique<SelectBook>();
+  }
+  if(type == "import") {
+    return std::make_unique<ImportBook>();
+  }
+  if(type == "modify") {
+    return std::make_unique<ModifyBook>();
+  }
   if(type == "show") {
     return std::make_unique<ShowBook>();
   }
   if(type == "buy") {
     return std::make_unique<BuyBook>();
   }
-  if(type == "select") {
-    return std::make_unique<SelectBook>();
-  }
-  if(type == "modify") {
-    return std::make_unique<ModifyBook>();
-  }
-  if(type == "import") {
-    return std::make_unique<ImportBook>();
-  }
   if(type == "show finance") {
     return std::make_unique<ShowFinance>();
   }
+  /*
   if(type == "report finance") {
     return std::make_unique<ReportFinance>();
   }
   if(type == "report employee") {
     return std::make_unique<ReportEmployee>();
   }*/
-  throw "don't have this command";
+  throw Exception("not implement this command");
 }
 
 int main() {
-  UserManager user_manger;
-  BookManager book_manger;
-  Command::init(&user_manger, &book_manger);
+  UserManager user_manager;
+  BookManager book_manager;
+  LogManager log_manager;
+  Command::init(&user_manager, &book_manager, &log_manager);
   //std::cerr << "finish init" << std::endl;
   std::string command;
   while(std::getline(std::cin, command)) {
@@ -67,12 +68,15 @@ int main() {
     std::stringstream ss(command);
     std::string type;
     ss >> type;
-    if(type == "show") {
+    if (type == "") {
+      continue;
+    }
+    if (type == "show") {
       std::string temp;
       ss >> temp;
-      if(temp == "finance") {
+      if (temp == "finance") {
         type += " " + temp;
-      } else {
+      } else if(temp != "") {
         args.push_back(temp);
       }
     }

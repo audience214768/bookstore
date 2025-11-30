@@ -8,7 +8,7 @@
 
 struct Session {
   size_t index_user_;
-  size_t index_book_ = 0;
+  size_t index_book_ = -1;
   Session(size_t index_user):index_user_(index_user) {}
 };
 
@@ -27,31 +27,40 @@ public:
   void UserAdd(std::string, std::string, int, std::string);
   void Passwd(std::string, std::string, std::string = "");
   void Delete(std::string);
-  void SelectBook(std::string);
+  void SelectBook(size_t);
 };
 
 class BookManager {
 private:
   std::vector<Book> book_list_;
   std::map<std::string, size_t> isbn_book_;
-  std::map<std::string, size_t> name_book_;
-  std::map<std::string, size_t> author_book_;
-  std::map<std::string, size_t> key_book_;
+  std::multimap<std::string, size_t> name_book_;
+  std::multimap<std::string, size_t> author_book_;
+  std::multimap<std::string, size_t> key_book_;
 public:
   const Book GetBook(size_t);
-  void Buy(std::string, int);
-  void Modify(size_t);
+  size_t UnrollIsbn(std::string);
+  double Buy(std::string, int);
+  void Modify(size_t, const std::string []);
+  void Import(size_t, int);
+  void Show(const std::string []);
+  void ShowIsbn();
+  void ShowName();
+  void ShowAuthor();
+
 };
 
-class LogManger {
+class LogManager {
 private:
   std::vector<FinancialLog> financial_log_;
   std::vector<SystemLog> system_log;
 public:
-  LogManger();
-  void PrintFinancial();
+  LogManager();
+  void ShowFinance(int = 0);
+  void ReportFinance();
   void PrintStaff();
   void PrintLog();
+  void AddFinancialLog(double);
 };
 
 #endif

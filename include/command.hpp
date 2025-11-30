@@ -9,8 +9,9 @@ class Command {
 protected:
   static UserManager *user_manager_;
   static BookManager *book_manager_;
+  static LogManager *log_manager_;
 public:
-  static void init(UserManager *, BookManager *);
+  static void init(UserManager *, BookManager *, LogManager *);
   virtual const char *Name() const = 0;
   virtual int NeedPrivilege() const = 0;
   virtual void Execute(const std::vector<std::string> &) = 0;
