@@ -19,14 +19,14 @@ private:
   std::map<std::string, size_t> id_user_;
 public:
   UserManager();
-  const Session &GetTopSession();
+  const Session GetTopSession();
   const User GetUser(size_t);
-  void Login(std::string, std::string = "");
-  void Logout();
-  void Register(std::string, std::string, std::string);
-  void UserAdd(std::string, std::string, int, std::string);
-  void Passwd(std::string, std::string, std::string = "");
-  void Delete(std::string);
+  SystemLog Login(std::string, std::string = "");
+  SystemLog Logout();
+  SystemLog Register(std::string, std::string, std::string);
+  SystemLog UserAdd(std::string, std::string, int, std::string);
+  SystemLog Passwd(std::string, std::string, std::string = "");
+  SystemLog Delete(std::string);
   void SelectBook(size_t);
 };
 
@@ -40,14 +40,10 @@ private:
 public:
   const Book GetBook(size_t);
   size_t UnrollIsbn(std::string);
-  double Buy(std::string, int);
-  void Modify(size_t, const std::string []);
-  void Import(size_t, int);
+  SystemLog Buy(std::string, int);
+  SystemLog Modify(size_t, const std::string []);
+  SystemLog Import(size_t, int);
   void Show(const std::string []);
-  void ShowIsbn();
-  void ShowName();
-  void ShowAuthor();
-
 };
 
 class LogManager {
@@ -56,11 +52,12 @@ private:
   std::vector<SystemLog> system_log;
 public:
   LogManager();
-  void ShowFinance(int = 0);
+  void ShowFinance(int = -1);
   void ReportFinance();
   void PrintStaff();
   void PrintLog();
   void AddFinancialLog(double);
+  void AddSystemLog(SystemLog &);
 };
 
 #endif

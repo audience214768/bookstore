@@ -2,6 +2,7 @@
 #include "config.hpp"
 #include "models.hpp"
 #include "utils.hpp"
+#include <cerrno>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
@@ -19,7 +20,7 @@ UserManager::UserManager() {
 }
 
 
-const Session &UserManager::GetTopSession() {
+const Session UserManager::GetTopSession() {
   return log_stack_.back();
 }
 
@@ -27,7 +28,7 @@ const User UserManager::GetUser(size_t index) {
   return user_list_[index];
 }
 
-void UserManager::Login(std::string id, std::string pwd) {
+SystemLog UserManager::Login(std::string id, std::string pwd) {
   if(id_user_.count(id) == 0) {
     throw Exception("the id is not exist");
   }
@@ -45,16 +46,20 @@ void UserManager::Login(std::string id, std::string pwd) {
       throw Exception(ss.str());
     }
   }
+  //std::cerr << "finish login" << std::endl;
+  return SystemLog(id.c_str(), "login", "", 0, 0, "");
 }
 
-void UserManager::Logout() {
+SystemLog UserManager::Logout() {
   if(log_stack_.size() == 1) {
     throw Exception("there is no account now");
   }
+  std::string id = user_list_[log_stack_.back().index_user_].userid_;
   log_stack_.pop_back();
+  return SystemLog(id.c_str(), "logout", "", 0, 0, "");
 }
 
-void UserManager::Register(std::string id, std::string pwd, std::string name) {
+SystemLog UserManager::Register(std::string id, std::string pwd, std::string name) {
   if(id_user_.count(id) != 0) {
     throw Exception("Register : the id is used");
   }
@@ -69,9 +74,10 @@ void UserManager::Register(std::string id, std::string pwd, std::string name) {
   }
   user_list_.push_back(User(id.c_str(), pwd.c_str(), name.c_str(), CUSTOMER));
   id_user_[id] = user_list_.size() - 1;
+  return SystemLog("", "registered", id.c_str(), 0, 0, "");
 }
 
-void UserManager::Passwd(std::string id, std::string new_id, std::string old_id) {
+SystemLog UserManager::Passwd(std::string id, std::string new_id, std::string old_id) {
   if(id_user_.count(id) == 0) {
     throw Exception("Passwd : the id is not exist");
   }
@@ -85,11 +91,13 @@ void UserManager::Passwd(std::string id, std::string new_id, std::string old_id)
     strncpy(user.password_, new_id.c_str(), new_id.length());
     user.password_[new_id.length()] = '\0';
     user_list_[index] = user;
+    return SystemLog(user_list_[1].userid_, "modify the pwd", user.userid_, 0, 0, "");
   } else {
     if (strcmp(old_id.c_str(), user.password_) == 0) {
       strncpy(user.password_, new_id.c_str(), new_id.length());
       user.password_[new_id.length()] = '\0';
       user_list_[index] = user;
+      return SystemLog(id.c_str(), "modify the pwd", user.userid_, 0, 0, "");
     } else {
       std::stringstream ss;
       ss << "Passwd : pwd is wrong";
@@ -98,7 +106,7 @@ void UserManager::Passwd(std::string id, std::string new_id, std::string old_id)
   }
 }
 
-void UserManager::UserAdd(std::string id, std::string pwd, int privilege, std::string name) {
+SystemLog UserManager::UserAdd(std::string id, std::string pwd, int privilege, std::string name) {
   if(id_user_.count(id) != 0) {
     throw Exception("UserAdd : the id is used");
   }
@@ -120,9 +128,10 @@ void UserManager::UserAdd(std::string id, std::string pwd, int privilege, std::s
   }
   id_user_[id] = user_list_.size();
   user_list_.push_back(User(id.c_str(), pwd.c_str(), name.c_str(), privilege));
+  return SystemLog(current_user.userid_, "add the user", id.c_str(), 0, 0, "");
 }
 
-void UserManager::Delete(std::string id) {
+SystemLog UserManager::Delete(std::string id) {
   if(id_user_.count(id) == 0) {
     throw Exception("Delete : the id is not exist");
   }
@@ -134,6 +143,7 @@ void UserManager::Delete(std::string id) {
   }
   user_list_.erase(user_list_.begin() + index);
   id_user_.erase(id);
+  return SystemLog(user_list_[1].userid_, "delete the user", id.c_str(), 0, 0, "");
 }
 
 void UserManager::SelectBook(size_t index) {
@@ -150,13 +160,14 @@ size_t BookManager::UnrollIsbn(std::string isbn) {
     }
 }
 
-void BookManager::Import(size_t index, int quantity) {
+SystemLog BookManager::Import(size_t index, int quantity) {
   Book book = book_list_[index];
   book.quantity_ += quantity;
   book_list_[index] = book;
+  return SystemLog("", "import", book.isbn_, quantity, 0, "");
 }
 
-void BookManager::Modify(size_t index, const std::string modify[]) {
+SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
   Book book = book_list_[index];
   if (modify[0] != "") {
     std::string new_isbn = modify[0];
@@ -226,6 +237,7 @@ void BookManager::Modify(size_t index, const std::string modify[]) {
     book.price_ = price;
   }
   book_list_[index] = book;
+  return SystemLog("", "modify", book.isbn_, 0, 0, "");
 }
 
 void BookManager::Show(const std::string show[]) {
@@ -292,7 +304,7 @@ void BookManager::Show(const std::string show[]) {
   }
 }
 
-double BookManager::Buy(std::string isbn, int quantity) {
+SystemLog BookManager::Buy(std::string isbn, int quantity) {
   if(isbn_book_.count(isbn) == 0) {
     throw Exception("buy : don't have this book");
   }
@@ -306,7 +318,7 @@ double BookManager::Buy(std::string isbn, int quantity) {
   }
   book.quantity_ -= quantity;
   book_list_[index] = book;
-  return book.price_ * quantity;
+  return SystemLog("", "buy", isbn.c_str(), quantity, quantity * book.price_, "");
 }
 
 LogManager::LogManager() {
@@ -316,18 +328,36 @@ LogManager::LogManager() {
 void LogManager::AddFinancialLog(double amount) {
   FinancialLog last_log = financial_log_.back();
   if (amount > 0) {
-    financial_log_.push_back(FinancialLog(last_log.postive_amount_ + amount, last_log.minus_amount_));
+    financial_log_.push_back(FinancialLog(last_log.positive_amount_ + amount, last_log.minus_amount_));
   } else {
-    financial_log_.push_back(FinancialLog(last_log.postive_amount_, last_log.minus_amount_ + amount));
+    financial_log_.push_back(FinancialLog(last_log.positive_amount_, last_log.minus_amount_ - amount));
   }
 }
 
 void LogManager::ShowFinance(int count) {
   FinancialLog final_log = financial_log_.back();
+  if(count == -1) {
+    printf("+ %.2lf - %.2lf\n", final_log.positive_amount_, final_log.minus_amount_);
+    return ;
+  } 
   if(count == 0) {
-    printf("+ %.2lf - %.2lf\n", final_log.postive_amount_, final_log.minus_amount_);
-  } else {
-    FinancialLog past_log = financial_log_[financial_log_.size() - count - 1];
-    printf("+ %.2lf - %.2lf\n", final_log.postive_amount_ - past_log.postive_amount_, final_log.minus_amount_ - past_log.minus_amount_);
+    printf("\n");
+    return ;
+  }
+  if(count > financial_log_.size()) {
+    throw Exception("showfinance : the count should less than max_count");
+  }
+  FinancialLog past_log = financial_log_[financial_log_.size() - count - 1];
+  printf("+ %.2lf - %.2lf\n", final_log.positive_amount_ - past_log.positive_amount_, final_log.minus_amount_ - past_log.minus_amount_);
+}
+
+void LogManager::AddSystemLog(SystemLog &log) {
+  system_log.push_back(log);
+}
+
+void LogManager::PrintLog() {
+   printf("%-10s %-20s %-10s %-10s %s\n", "User", "Action", "Target", "Money", "Details");
+  for(auto log : system_log) {
+    printf("%-10s %-20s %-10s %-10.2lf %s\n", log.userid_, log.action_, log.target_, log.total_amount_, log.info_);
   }
 }

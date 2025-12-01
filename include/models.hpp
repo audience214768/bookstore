@@ -22,18 +22,19 @@ struct Book {
 };
 
 struct FinancialLog {
-  double postive_amount_;
+  double positive_amount_;
   double minus_amount_;
   FinancialLog(double, double);
 };
 
 struct SystemLog {
-  char userid_[30];
-  char action_[20];
-  char target[30];
-  int quantity = 0;
-  double price_ = 0;
-  char info[20];
+  SystemLog(const char *, const char *, const char *, int, double, const char *);
+  char userid_[31];
+  char action_[30];
+  char target_[31];
+  int quantity_;
+  double total_amount_;
+  char info_[120];
 };
 
 #endif

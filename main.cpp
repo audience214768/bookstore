@@ -46,6 +46,9 @@ std::unique_ptr<Command> CreatCommand(std::string type) {
   if(type == "show finance") {
     return std::make_unique<ShowFinance>();
   }
+  if(type == "log") {
+    return std::make_unique<ShowLog>();
+  }
   /*
   if(type == "report finance") {
     return std::make_unique<ReportFinance>();
@@ -94,6 +97,7 @@ int main() {
       auto cmd = CreatCommand(type);
       //std::cerr << "creat command" << std::endl;
       cmd->run(args);
+      //std::cerr << "finish " << type << std::endl;
     } catch(Exception &err) {
       printf("Invalid\n");
       std::cerr << err.what() << std::endl;
