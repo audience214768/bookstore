@@ -1,6 +1,8 @@
 #ifndef MODEL
 #define MODEL
 
+#include <iostream>
+
 struct User {
   int privilege_ = 0;
   char userid_[31];
@@ -36,5 +38,38 @@ struct SystemLog {
   double total_amount_;
   char info_[120];
 };
+
+template<int len = 1>
+struct FixedString {
+  char str[len];
+  FixedString() {
+    memset(str, 0, len);
+  }
+  bool operator<(const FixedString<len> &other) const {
+    return strcmp(str, other.str) < 0;
+  }
+  bool operator>=(const FixedString<len> &other) const {
+    return strcmp(str, other.str) >= 0;
+  }
+  bool operator==(const FixedString<len> &other) const {
+    return strcmp(str, other.str) == 0;
+  }
+  FixedString<len> &operator=(const FixedString<len> &other) {
+    strcpy(str, other.str);
+    return *this;
+  }
+};
+
+template<int len = 1>
+std::istream &operator>>(std::istream &is, FixedString<len> &fs) {
+  is >> fs.str;
+  return is;
+}
+
+template<int len = 1>
+std::ostream &operator<<(std::ostream &os, const FixedString<len> &fs) {
+  os << fs.str;
+  return os;
+}
 
 #endif

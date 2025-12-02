@@ -2,6 +2,8 @@
 #include "config.hpp"
 #include "models.hpp"
 #include "utils.hpp"
+#include "file_io.hpp"
+#include "unrollindex.hpp"
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>

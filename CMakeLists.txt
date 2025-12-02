@@ -4,4 +4,4 @@ project(Bookstore)
 
 include_directories(include)
 
-add_executable(code main.cpp src/command.cpp src/manager.cpp src/models.cpp src/storage.cpp)
+add_executable(code main.cpp src/command.cpp src/manager.cpp src/models.cpp)

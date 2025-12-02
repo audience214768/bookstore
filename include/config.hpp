@@ -6,4 +6,6 @@ constexpr int CUSTOMER = 1;
 constexpr int STAFF = 3;
 constexpr int ADMIN = 7;
 
+constexpr int BlockSize = 3;
+
 #endif
