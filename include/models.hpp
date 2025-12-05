@@ -2,6 +2,10 @@
 #define MODEL
 
 #include <iostream>
+#include <cstring>
+#include <ostream>
+#include "utils.hpp"
+
 
 struct User {
   int privilege_ = 0;
@@ -21,7 +25,9 @@ struct Book {
   double price_ = 0;
   double total_cast_ = 0;
   Book(const char *);
+  
 };
+
 
 struct FinancialLog {
   double positive_amount_;
@@ -44,6 +50,18 @@ struct FixedString {
   char str[len];
   FixedString() {
     memset(str, 0, len);
+  }
+  FixedString(std::string other) {
+    if(other.length() > len) {
+      throw Exception("the len of string is bigger than FixedLen");
+    }
+    strcpy(str, other.c_str());
+  }
+  FixedString(char other[]) {
+    if(strlen(other) > len) {
+      throw Exception("the len of char array is bigger than FixedLen");
+    }
+    strcpy(str, other);
   }
   bool operator<(const FixedString<len> &other) const {
     return strcmp(str, other.str) < 0;

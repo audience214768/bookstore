@@ -5,6 +5,7 @@
 #include "file_io.hpp"
 #include <algorithm>
 #include <cstdlib>
+#include <functional>
 #include <vector>
 
 template<class Key, class Value>
@@ -156,6 +157,20 @@ public:
     block.data[i].value = value;
     block.count_++;
     UpdateBlock(block, now);
+  }
+  std::vector<Value> traverse(std::function<void(Value &)> callback) {
+    int now;
+    file_.get_info(now, 1);
+    std::vector<Value> list;
+    while(now != -1) {
+      BlockType block;
+      file_.read(block, now);
+      for(int i = 0; i < block.count_; i++) {
+        callback(block.data[i].value);
+      }
+      now = block.next;
+    }
+    return list;
   }
   bool Delete(const Key &key, const Value &value) { // return 0 for {key, value} not exist
     int now;

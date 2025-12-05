@@ -2,6 +2,7 @@
 #define BPT_MEMORYRIVER_HPP
 
 #include <fstream>
+#include <functional>
 
 using std::fstream;
 using std::ifstream;
@@ -14,6 +15,7 @@ private:
   /* your code here */
   fstream file;
   string file_name;
+  int count = 0;
   int sizeofT = sizeof(T);
 
 public:
@@ -35,6 +37,10 @@ public:
     if(file.is_open()) {
       file.close();
     }
+  }
+
+  int size() {
+    return count;
   }
 
   // 读出第n个int的值赋给tmp，1_base
@@ -76,6 +82,7 @@ public:
     int size = file.tellp();
     file.seekp(offset);
     file.write(reinterpret_cast<const char *>(&t), sizeofT);
+    count++;
     return head;
   }
 
@@ -104,6 +111,21 @@ public:
     file.seekp(offset);
     file.write(reinterpret_cast<char *>(&head), sizeof(int));
     write_info(index, 2);
+    count--;
+  }
+  T operator[](int index) const{
+    T t;
+    read(t, index);
+    return t;
+  }
+  void tranverse(std::function<void(T &)> callback) {
+    int now;
+    get_info(now, 1);
+    for(int i = 0; i < count; i++) {
+      T t;
+      read(t, i);
+      callback(t);
+    }
   }
 };
 

@@ -3,8 +3,9 @@
 
 #include <vector>
 #include <string>
-#include <map>
 #include "models.hpp"
+#include "unrollindex.hpp"
+#include "file_io.hpp"
 
 struct Session {
   size_t index_user_;
@@ -15,8 +16,8 @@ struct Session {
 class UserManager {
 private: 
   std::vector<Session> log_stack_;
-  std::vector<User> user_list_;
-  std::map<std::string, size_t> id_user_;
+  MemoryRiver<User> user_list_;
+  UnrollIndex<FixedString<30>, int> id_user_;
 public:
   UserManager();
   const Session GetTopSession();
@@ -32,14 +33,15 @@ public:
 
 class BookManager {
 private:
-  std::vector<Book> book_list_;
-  std::map<std::string, size_t> isbn_book_;
-  std::multimap<std::string, size_t> name_book_;
-  std::multimap<std::string, size_t> author_book_;
-  std::multimap<std::string, size_t> key_book_;
+  MemoryRiver<Book> book_list_;
+  UnrollIndex<FixedString<20>, int> isbn_book_;
+  UnrollIndex<FixedString<60>, int> name_book_;
+  UnrollIndex<FixedString<60>, int> author_book_;
+  UnrollIndex<FixedString<60>, int> key_book_;
 public:
+  BookManager();
   const Book GetBook(size_t);
-  size_t UnrollIsbn(std::string);
+  int UnrollIsbn(std::string);
   SystemLog Buy(std::string, int);
   SystemLog Modify(size_t, const std::string []);
   SystemLog Import(size_t, int);
@@ -48,8 +50,8 @@ public:
 
 class LogManager {
 private:
-  std::vector<FinancialLog> financial_log_;
-  std::vector<SystemLog> system_log;
+  MemoryRiver<FinancialLog> financial_log_;
+  MemoryRiver<SystemLog> system_log;
 public:
   LogManager();
   void ShowFinance(int = -1);
