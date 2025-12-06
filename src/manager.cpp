@@ -328,20 +328,20 @@ SystemLog BookManager::Buy(std::string isbn, int quantity) {
 }
 
 LogManager::LogManager():finance_log_("../data/finance_log.dat"), system_log("../data/system_log.dat") {
-  finance_log_.write(FinancialLog(0, 0));
+  finance_log_.write(FinanceLog(0, 0));
 }
 
 void LogManager::AddFinancialLog(double amount) {
-  FinancialLog last_log = finance_log_[finance_log_.size() - 1];
+  FinanceLog last_log = finance_log_[finance_log_.size() - 1];
   if (amount > 0) {
-    finance_log_.write(FinancialLog(last_log.positive_amount_ + amount, last_log.minus_amount_));
+    finance_log_.write(FinanceLog(last_log.positive_amount_ + amount, last_log.minus_amount_));
   } else {
-    finance_log_.write(FinancialLog(last_log.positive_amount_, last_log.minus_amount_ - amount));
+    finance_log_.write(FinanceLog(last_log.positive_amount_, last_log.minus_amount_ - amount));
   }
 }
 
 void LogManager::ShowFinance(int count) {
-  FinancialLog final_log = finance_log_[finance_log_.size() - 1];
+  FinanceLog final_log = finance_log_[finance_log_.size() - 1];
   if(count == -1) {
     printf("+ %.2lf - %.2lf\n", final_log.positive_amount_, final_log.minus_amount_);
     return ;
@@ -353,7 +353,7 @@ void LogManager::ShowFinance(int count) {
   if(count > finance_log_.size()) {
     throw Exception("showfinance : the count should less than max_count");
   }
-  FinancialLog past_log = finance_log_[finance_log_.size() - count - 1];
+  FinanceLog past_log = finance_log_[finance_log_.size() - count - 1];
   printf("+ %.2lf - %.2lf\n", final_log.positive_amount_ - past_log.positive_amount_, final_log.minus_amount_ - past_log.minus_amount_);
 }
 

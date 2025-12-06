@@ -26,15 +26,14 @@ struct Book {
   double total_cast_ = 0;
   Book() = default;
   Book(const char *);
-  
 };
 
 
-struct FinancialLog {
+struct FinanceLog {
   double positive_amount_ = 0;
   double minus_amount_ = 0;
-  FinancialLog() = default;
-  FinancialLog(double, double);
+  FinanceLog() = default;
+  FinanceLog(double, double);
 };
 
 struct SystemLog {

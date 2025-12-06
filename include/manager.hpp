@@ -50,7 +50,7 @@ public:
 
 class LogManager {
 private:
-  MemoryRiver<FinancialLog> finance_log_;
+  MemoryRiver<FinanceLog> finance_log_;
   MemoryRiver<SystemLog> system_log;
 public:
   LogManager();
