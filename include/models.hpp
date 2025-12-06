@@ -12,7 +12,7 @@ struct User {
   char userid_[31];
   char password_[31];
   char username_[31];
-  User();
+  User() = default;
   User(const char *, const char *, const char *, const int);
 };
 
@@ -24,24 +24,27 @@ struct Book {
   int quantity_ = 0;
   double price_ = 0;
   double total_cast_ = 0;
+  Book() = default;
   Book(const char *);
   
 };
 
 
 struct FinancialLog {
-  double positive_amount_;
-  double minus_amount_;
+  double positive_amount_ = 0;
+  double minus_amount_ = 0;
+  FinancialLog() = default;
   FinancialLog(double, double);
 };
 
 struct SystemLog {
   SystemLog(const char *, const char *, const char *, int, double, const char *);
+  SystemLog() = default;
   char userid_[31];
   char action_[30];
   char target_[31];
-  int quantity_;
-  double total_amount_;
+  int quantity_ = 0;
+  double total_amount_ = 0;
   char info_[120];
 };
 

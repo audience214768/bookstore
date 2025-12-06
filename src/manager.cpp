@@ -14,7 +14,7 @@
 #include <set>
 #include <algorithm>
 
-UserManager::UserManager():user_list_("..data/user.dat"), id_user_("../data/user_id.dat") {
+UserManager::UserManager():user_list_("../data/user.dat"), id_user_("../data/user_id.dat") {
   user_list_.write(User("visitor", "", "virtual", VISITOR));
   int index = user_list_.write(User("root", "sjtu", "audience", ADMIN));
   id_user_.Insert(std::string("root"), index);
@@ -26,23 +26,23 @@ const Session UserManager::GetTopSession() {
   return log_stack_.back();
 }
 
-const User UserManager::GetUser(size_t index) {
+User UserManager::GetUser(size_t index) {
   return user_list_[index];
 }
 
 SystemLog UserManager::Login(std::string id, std::string pwd) {
   auto user_index = id_user_[id];
   if(user_index.empty()) {
-    throw Exception("the id is not exist");
+    throw Exception("login : the id is not exist");
   }
   int index = user_index[0];
-  User user;
-  user_list_.read(user, index);
+  User user = user_list_[index];
   Session session = GetTopSession();
   User current_user = user_list_[session.index_user_];
   if(current_user.privilege_ > user.privilege_) {
     log_stack_.push_back(Session(index));
   } else {
+    std::cerr << pwd.c_str() << " " << user.password_ << std::endl;
     if (strcmp(pwd.c_str(), user.password_) == 0) {
       log_stack_.push_back(index);
     } else {
@@ -118,7 +118,7 @@ SystemLog UserManager::Passwd(std::string id, std::string new_id, std::string ol
 
 SystemLog UserManager::UserAdd(std::string id, std::string pwd, int privilege, std::string name) {
   auto user_index = id_user_[id];
-  if(user_index.empty()) {
+  if(!user_index.empty()) {
     throw Exception("UserAdd : the id is used");
   }
   Session session = GetTopSession();
@@ -327,21 +327,21 @@ SystemLog BookManager::Buy(std::string isbn, int quantity) {
   return SystemLog("", "buy", isbn.c_str(), quantity, quantity * book.price_, "");
 }
 
-LogManager::LogManager() {
-  financial_log_.write(FinancialLog(0, 0));
+LogManager::LogManager():finance_log_("../data/finance_log.dat"), system_log("../data/system_log.dat") {
+  finance_log_.write(FinancialLog(0, 0));
 }
 
 void LogManager::AddFinancialLog(double amount) {
-  FinancialLog last_log = financial_log_[financial_log_.size() - 1];
+  FinancialLog last_log = finance_log_[finance_log_.size() - 1];
   if (amount > 0) {
-    financial_log_.write(FinancialLog(last_log.positive_amount_ + amount, last_log.minus_amount_));
+    finance_log_.write(FinancialLog(last_log.positive_amount_ + amount, last_log.minus_amount_));
   } else {
-    financial_log_.write(FinancialLog(last_log.positive_amount_, last_log.minus_amount_ - amount));
+    finance_log_.write(FinancialLog(last_log.positive_amount_, last_log.minus_amount_ - amount));
   }
 }
 
 void LogManager::ShowFinance(int count) {
-  FinancialLog final_log = financial_log_[financial_log_.size() - 1];
+  FinancialLog final_log = finance_log_[finance_log_.size() - 1];
   if(count == -1) {
     printf("+ %.2lf - %.2lf\n", final_log.positive_amount_, final_log.minus_amount_);
     return ;
@@ -350,10 +350,10 @@ void LogManager::ShowFinance(int count) {
     printf("\n");
     return ;
   }
-  if(count > financial_log_.size()) {
+  if(count > finance_log_.size()) {
     throw Exception("showfinance : the count should less than max_count");
   }
-  FinancialLog past_log = financial_log_[financial_log_.size() - count - 1];
+  FinancialLog past_log = finance_log_[finance_log_.size() - count - 1];
   printf("+ %.2lf - %.2lf\n", final_log.positive_amount_ - past_log.positive_amount_, final_log.minus_amount_ - past_log.minus_amount_);
 }
 

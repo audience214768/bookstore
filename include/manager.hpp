@@ -21,7 +21,7 @@ private:
 public:
   UserManager();
   const Session GetTopSession();
-  const User GetUser(size_t);
+  User GetUser(size_t);
   SystemLog Login(std::string, std::string = "");
   SystemLog Logout();
   SystemLog Register(std::string, std::string, std::string);
@@ -50,7 +50,7 @@ public:
 
 class LogManager {
 private:
-  MemoryRiver<FinancialLog> financial_log_;
+  MemoryRiver<FinancialLog> finance_log_;
   MemoryRiver<SystemLog> system_log;
 public:
   LogManager();
