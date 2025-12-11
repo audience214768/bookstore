@@ -14,10 +14,23 @@
 #include <algorithm>
 
 UserManager::UserManager():user_list_("../data/user.dat"), id_user_("../data/user_id.dat") {
-  user_list_.write(User("visitor", "", "virtual", VISITOR));
-  int index = user_list_.write(User("root", "sjtu", "audience", ADMIN));
-  id_user_.Insert(std::string("root"), index);
-  log_stack_.push_back(Session(0));
+  int index;
+  auto user_index = id_user_[std::string("virtual_visitor")];
+  if(user_index.empty()) {
+    //std::cerr << 1 << std::endl;
+    index = user_list_.write(User("virtual_visitor", "audience", "virtual", VISITOR));
+    id_user_.Insert(std::string("virtual_visitor"), index);
+  } else {
+    index = user_index[0];
+  }
+  log_stack_.push_back(Session(index));
+  user_index = id_user_[std::string("root")];
+  if(user_index.empty()) {
+    index = user_list_.write(User("root", "sjtu", "audience", ADMIN));
+    id_user_.Insert(std::string("root"), index);
+  }
+  //user_index = id_user_[std::string("worker")];
+  //std::cerr << user_index.empty() << std::endl;
 }
 
 
@@ -30,18 +43,22 @@ User UserManager::GetUser(size_t index) {
 }
 
 SystemLog UserManager::Login(std::string id, std::string pwd) {
+  //std::cerr << id << std::endl;
   auto user_index = id_user_[id];
   if(user_index.empty()) {
-    throw Exception("login : the id is not exist");
+    std::stringstream ss;
+    ss << "login : thd id : " << id << " is not exist";
+    throw Exception(ss.str());
   }
   int index = user_index[0];
   User user = user_list_[index];
+  //std::cerr << user.userid_ << std::endl;
   Session session = GetTopSession();
   User current_user = user_list_[session.index_user_];
   if(current_user.privilege_ > user.privilege_) {
     log_stack_.push_back(Session(index));
   } else {
-    std::cerr << pwd.c_str() << " " << user.password_ << std::endl;
+    //std::cerr << pwd.c_str() << " " << user.password_ << std::endl;
     if (strcmp(pwd.c_str(), user.password_) == 0) {
       log_stack_.push_back(index);
     } else {
@@ -84,12 +101,12 @@ SystemLog UserManager::Register(std::string id, std::string pwd, std::string nam
   return SystemLog("", "registered", id.c_str(), 0, 0, "");
 }
 
-SystemLog UserManager::Passwd(std::string id, std::string new_id, std::string old_id) {
+SystemLog UserManager::Passwd(std::string id, std::string new_pwd, std::string old_pwd) {
   auto user_index = id_user_[id];
   if(user_index.empty()) {
     throw Exception("Passwd : the id is not exist");
   }
-  if(new_id.length() > 30) {
+  if(new_pwd.length() > 30) {
     throw Exception("Register : the length of pwd should be less than 30");
   }
   size_t index = user_index[0];
@@ -97,15 +114,15 @@ SystemLog UserManager::Passwd(std::string id, std::string new_id, std::string ol
   Session session = GetTopSession();
   User current_user = user_list_[session.index_user_];
   if(current_user.privilege_ == ADMIN) {
-    strncpy(user.password_, new_id.c_str(), new_id.length());
-    user.password_[new_id.length()] = '\0';
-    user_list_[index] = user;
+    strncpy(user.password_, new_pwd.c_str(), new_pwd.length());
+    user.password_[new_pwd.length()] = '\0';
+    user_list_.update(user, index);
     return SystemLog(current_user.userid_, "modify the pwd", user.userid_, 0, 0, "");
   } else {
-    if (strcmp(old_id.c_str(), user.password_) == 0) {
-      strncpy(user.password_, new_id.c_str(), new_id.length());
-      user.password_[new_id.length()] = '\0';
-      user_list_[index] = user;
+    if (strcmp(old_pwd.c_str(), user.password_) == 0) {
+      strncpy(user.password_, new_pwd.c_str(), new_pwd.length());
+      user.password_[new_pwd.length()] = '\0';
+      user_list_.update(user, index);
       return SystemLog(id.c_str(), "modify the pwd", user.userid_, 0, 0, "");
     } else {
       std::stringstream ss;
@@ -191,6 +208,10 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
     }
     if(new_isbn.length() > 20) {
       throw Exception("modify : the isbn is longer than 20");
+    }
+    auto book_index = isbn_book_[new_isbn];
+    if(!book_index.empty()) {
+      throw Exception("modify : the isbn is used");
     }
     isbn_book_.Delete(book.isbn_, index);
     strncpy(book.isbn_, new_isbn.c_str(), new_isbn.length());
@@ -322,11 +343,12 @@ SystemLog BookManager::Buy(std::string isbn, int quantity) {
     throw Exception("buy : we don't have enough book");
   }
   book.quantity_ -= quantity;
-  book_list_[index] = book;
+  printf("%0.2lf\n", quantity * book.price_);
+  book_list_.update(book, index);
   return SystemLog("", "buy", isbn.c_str(), quantity, quantity * book.price_, "");
 }
 
-LogManager::LogManager():finance_log_("../data/finance_log.dat"), system_log("../data/system_log.dat") {
+LogManager::LogManager():finance_log_("../data/finance_log.log"), system_log("../data/system_log.log") {
   finance_log_.write(FinanceLog(0, 0));
 }
 

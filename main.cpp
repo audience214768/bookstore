@@ -5,6 +5,7 @@
 #include "command.hpp"
 #include "manager.hpp"
 #include "utils.hpp"
+#include "journal.hpp"
 
 std::unique_ptr<Command> CreatCommand(std::string type) {
   if(type == "exit" || type == "quit") {
@@ -63,6 +64,7 @@ int main() {
   UserManager user_manager;
   BookManager book_manager;
   LogManager log_manager;
+  //JournalManager journal_manager("data/journal.log");
   Command::init(&user_manager, &book_manager, &log_manager);
   //std::cerr << "finish init" << std::endl;
   std::string command;
@@ -101,6 +103,8 @@ int main() {
     } catch(Exception &err) {
       printf("Invalid\n");
       std::cerr << err.what() << std::endl;
+    } catch(ProgramExitException &err) {
+      break;
     }
   }
 }

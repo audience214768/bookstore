@@ -40,7 +40,7 @@ void Exit::Execute(const std::vector<std::string> &args) {
     ss << "Exit : need 0 argument but given" << args.size();
     throw Exception(ss.str());
   }
-  exit(0);
+  throw ProgramExitException();
 }
 
 const char *Login::Name() const { return "login"; }
@@ -213,17 +213,17 @@ void ModifyBook::Execute(const std::vector<std::string> &args) {
       if (modify[1] != "") {
         throw Exception("modify : multiple name");
       }
-      modify[1] = info;
+      modify[1] = info.substr(1, info.length() - 2);
     } else if (type == "author") {
       if (modify[2] != "") {
         throw Exception("modify : multiple author");
       }
-      modify[2] = info;
+      modify[2] = info.substr(1, info.length() - 2);
     } else if (type == "keyword") {
       if (modify[3] != "") {
         throw Exception("modify : multiple keyword");
       }
-      modify[3] = info;
+      modify[3] = info.substr(1, info.length() - 2);
     } else if (type == "price") {
       if (modify[4] != "") {
         throw Exception("modify : multiple name");
@@ -262,14 +262,14 @@ void ShowBook::Execute(const std::vector<std::string> &args) {
     if (type == "ISBN") {
       show[0] = info;
     } else if (type == "name") {
-      show[1] = info;
+      show[1] = info.substr(1, info.length() - 2);
     } else if (type == "author") {
-      show[2] = info;
+      show[2] = info.substr(1, info.length() - 2);
     } else if (type == "keyword") {
       if(info.find("=") != std::string::npos) {
         throw Exception("show : can't find mutiple keyword");
       }
-      show[3] = info;
+      show[3] = info.substr(1, info.length() - 2);
     } else {
       throw Exception("show : invalid arg");
     }

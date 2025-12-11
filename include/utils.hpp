@@ -17,6 +17,8 @@ public:
     }
 };
 
+class ProgramExitException : public std::exception {};
+
 template <typename T>
 struct is_basic_string : std::false_type {};
 

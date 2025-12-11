@@ -2,6 +2,7 @@
 #define BPT_MEMORYRIVER_HPP
 
 #include "cache.hpp"
+#include "journal.hpp"
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -38,6 +39,15 @@ public:
   }
 
   ~MemoryRiver() {
+    //std::cerr << 1 << std::endl;
+    auto write = [this](const int &index, const T &data) {
+      //std::cerr << index << std::endl;
+      int offset = sizeofT * index + info_len * sizeof(int);
+      file.seekp(offset);
+      file.write(reinterpret_cast<const char *>(&data), sizeofT);
+    };
+    cache.FlushAll(write);
+    file.flush();
     if(file.is_open()) {
       file.close();
     }
@@ -78,7 +88,7 @@ public:
       file.write(reinterpret_cast<const char *>(&t), sizeofT);
       count ++;
       int index = (size - info_len * sizeof(int)) / sizeofT;
-      auto ret = cache.Put(index, t, 1);
+      auto ret = cache.Put(index, t, 0);
       if(ret.first && ret.second.is_dirty_) {
         size_t offset = sizeof(int) * info_len + sizeofT * ret.second.key_;
         file.seekp(offset);
@@ -95,7 +105,7 @@ public:
     file.seekp(offset);
     file.write(reinterpret_cast<const char *>(&t), sizeofT);
     count++;
-    auto ret = cache.Put(head, t, 1);
+    auto ret = cache.Put(head, t, 0);
     if(ret.first && ret.second.is_dirty_) {
       size_t offset = sizeof(int) * info_len + sizeofT * ret.second.key_;
       file.seekp(offset);

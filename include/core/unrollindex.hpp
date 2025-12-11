@@ -122,10 +122,10 @@ private:
     file_.update(block, index);
   }
 public:
-  UnrollIndex(std::string file_name):file_(file_name) {
+  UnrollIndex(const std::string &file_name):file_(file_name) {
     int head;
     file_.get_info(head, 1);
-    //std::cerr << head << std::endl;
+    //std::cerr << "head : " << head << std::endl;
     if(head == -1) {
       BlockType head;
       int index = file_.write(head);

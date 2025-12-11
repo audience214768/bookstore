@@ -3,6 +3,7 @@
 
 #include "config.hpp"
 #include <iostream>
+#include <functional>
 #include <list>
 #include <unordered_map>
 
@@ -47,6 +48,15 @@ public:
     cache.push_front(new_node);
     map[key] = cache.begin();
     return std::make_pair(need_back, old_node);
+  }
+  void FlushAll(std::function<void(const Key &, const Value &)> func) {
+    for(auto node : cache) {
+      //std::cerr << 1 << std::endl;
+      if(node.is_dirty_) {
+        func(node.key_, node.value_);
+        node.is_dirty_ = 0;
+      }
+    }
   }
 };
 
