@@ -13,7 +13,7 @@
 #include <set>
 #include <algorithm>
 
-UserManager::UserManager():user_list_("../data/user.dat"), id_user_("../data/user_id.dat") {
+UserManager::UserManager():user_list_("user.dat"), id_user_("user_id.dat") {
   int index;
   auto user_index = id_user_[std::string("virtual_visitor")];
   if(user_index.empty()) {
@@ -178,7 +178,7 @@ void UserManager::SelectBook(size_t index) {
   log_stack_.back().index_book_ = index;
 }
 
-BookManager::BookManager():book_list_("../data/book.dat"), isbn_book_("../data/book_isbn.dat"), name_book_("../data/book_name.dat"), author_book_("../data/book_author.dat"), key_book_("../data/book_key.dat") {}
+BookManager::BookManager():book_list_("book.dat"), isbn_book_("book_isbn.dat"), name_book_("book_name.dat"), author_book_("book_author.dat"), key_book_("book_key.dat") {}
 
 int BookManager::UnrollIsbn(std::string isbn) {
   auto book_index = isbn_book_[isbn];
@@ -348,7 +348,7 @@ SystemLog BookManager::Buy(std::string isbn, int quantity) {
   return SystemLog("", "buy", isbn.c_str(), quantity, quantity * book.price_, "");
 }
 
-LogManager::LogManager():finance_log_("../data/finance_log.log"), system_log("../data/system_log.log") {
+LogManager::LogManager():finance_log_("finance_log.log"), system_log("system_log.log") {
   if(finance_log_.size() == 0) {
     finance_log_.write(FinanceLog(0, 0));
   }

@@ -1,12 +1,6 @@
 /test
 /build
 /.cache
-/data/book_author.dat
-/data/book_isbn.dat
-/data/book_key.dat
-/data/book_name.dat
-/data/book.dat
-/data/finance_log.log
-/data/system_log.log
-/data/user_id.dat
-/data/user.dat
+./test.py
+*.dat
+*.log
