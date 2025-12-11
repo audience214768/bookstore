@@ -1,3 +1,0 @@
-/home/aud_xiejiaye/program/cpp/bookstore/CMakeFiles/code.dir
-/home/aud_xiejiaye/program/cpp/bookstore/CMakeFiles/edit_cache.dir
-/home/aud_xiejiaye/program/cpp/bookstore/CMakeFiles/rebuild_cache.dir
