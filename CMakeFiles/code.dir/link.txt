@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/code.dir/main.cpp.o CMakeFiles/code.dir/src/command.cpp.o CMakeFiles/code.dir/src/manager.cpp.o CMakeFiles/code.dir/src/models.cpp.o -o code 

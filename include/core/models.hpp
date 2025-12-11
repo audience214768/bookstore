@@ -44,7 +44,7 @@ struct SystemLog {
   char target_[31];
   int quantity_ = 0;
   double total_amount_ = 0;
-  char info_[120];
+  char info_[300];
 };
 
 template<int len = 1>

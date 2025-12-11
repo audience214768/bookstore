@@ -106,6 +106,8 @@ int main() {
       std::cerr << err.what() << std::endl;
     } catch(ProgramExitException &err) {
       break;
+    } catch(...) {
+      std::cerr << "something unecpected" << std::endl;
     }
   }
 }
