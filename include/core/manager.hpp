@@ -17,7 +17,7 @@ class UserManager {
 private: 
   std::vector<Session> log_stack_;
   MemoryRiver<User> user_list_;
-  UnrollIndex<FixedString<30>, int> id_user_;
+  UnrollIndex<FixedString<31>, int> id_user_;
 public:
   UserManager();
   const Session GetTopSession();
@@ -34,10 +34,10 @@ public:
 class BookManager {
 private:
   MemoryRiver<Book> book_list_;
-  UnrollIndex<FixedString<20>, int> isbn_book_;
-  UnrollIndex<FixedString<60>, int> name_book_;
-  UnrollIndex<FixedString<60>, int> author_book_;
-  UnrollIndex<FixedString<60>, int> key_book_;
+  UnrollIndex<FixedString<21>, int> isbn_book_;
+  UnrollIndex<FixedString<61>, int> name_book_;
+  UnrollIndex<FixedString<61>, int> author_book_;
+  UnrollIndex<FixedString<61>, int> key_book_;
 public:
   BookManager();
   const Book GetBook(size_t);
