@@ -2,6 +2,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <filesystem>
 #include "command.hpp"
 #include "manager.hpp"
 #include "utils.hpp"
@@ -61,6 +62,9 @@ std::unique_ptr<Command> CreatCommand(std::string type) {
 }
 
 int main() {
+  if (!std::filesystem::exists("data")) {
+    std::filesystem::create_directory("data");
+  }
   UserManager user_manager;
   BookManager book_manager;
   LogManager log_manager;
