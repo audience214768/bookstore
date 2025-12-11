@@ -1,6 +1,6 @@
 /test
 /build
 /.cache
-./test.py
+/test.py
 *.dat
 *.log

@@ -263,7 +263,12 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
     book.keyword_[new_keyword.length()] = '\0';
   }
   if (modify[4] != "") {
-    double price = std::stod(modify[4]);
+    double price;
+    try {
+      price = std::stod(modify[4]);
+    } catch(...) {
+      throw Exception("modify : price need to be num");
+    }
     book.price_ = price;
   }
   book_list_.update(book, index);
@@ -348,7 +353,7 @@ SystemLog BookManager::Buy(std::string isbn, int quantity) {
   return SystemLog("", "buy", isbn.c_str(), quantity, quantity * book.price_, "");
 }
 
-LogManager::LogManager():finance_log_("finance_log.log"), system_log("system_log.log") {
+LogManager::LogManager():finance_log_("finance.log"), system_log("system.log") {
   if(finance_log_.size() == 0) {
     finance_log_.write(FinanceLog(0, 0));
   }

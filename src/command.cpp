@@ -169,8 +169,15 @@ void ImportBook::Execute(const std::vector<std::string> &args) {
   if(session.index_book_ == -1) {
     throw Exception("Import : havn't selected a book");
   }
-  int quantity = std::stod(args[0]);
-  double total_cast = std::stod(args[1]);
+  int quantity;
+  
+  double total_cast;
+  try {
+    quantity = std::stod(args[0]);
+    total_cast = std::stod(args[1]);
+  } catch(...) {
+    throw Exception("import : arg need to bu num");
+  }
   if(quantity <= 0) {
     throw Exception("Import : the quantity is not postive");
   }
@@ -291,7 +298,13 @@ void BuyBook::Execute(const std::vector<std::string> &args) {
     throw Exception(ss.str());
   }
   User current_user = user_manager_->GetUser(user_manager_->GetTopSession().index_user_);
-  SystemLog log = book_manager_->Buy(args[0], std::stod(args[1]));
+  int quantity;
+  try {
+    quantity = std::stod(args[1]);
+  } catch(...) {
+    throw Exception("buy : quantity need to be num");
+  }
+  SystemLog log = book_manager_->Buy(args[0], quantity);
   strcpy(log.userid_, current_user.userid_);
   log_manager_->AddSystemLog(log);
   log_manager_->AddFinancialLog(log.total_amount_);
@@ -308,7 +321,13 @@ void ShowFinance::Execute(const std::vector<std::string> &args) {
     return ;
   }
   if(args.size() == 1) {
-    log_manager_->ShowFinance(std::stod(args[0]));
+    int count;
+    try {
+      count = std::stod(args[0]);
+    } catch(...) {
+      throw Exception("show finance : count need to be num");
+    }
+    log_manager_->ShowFinance(count);
     return ;
   }
   throw Exception("show finance : need 0 / 1 argument");
