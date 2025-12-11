@@ -312,7 +312,7 @@ void BuyBook::Execute(const std::vector<std::string> &args) {
 
 const char *ShowFinance::Name() const { return "showfinance"; }
 
-int ShowFinance::NeedPrivilege() const { return CUSTOMER; }
+int ShowFinance::NeedPrivilege() const { return ADMIN; }
 
 void ShowFinance::Execute(const std::vector<std::string> &args) {
   //std::cerr << "Logout" << std::endl;

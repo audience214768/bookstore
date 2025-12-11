@@ -292,7 +292,7 @@ void BookManager::Show(const std::string show[]) {
     for (auto it : book_index) {
       book_list.push_back(book_list_[it]);
     }
-    sort(book_list.begin(), book_list.end(), [](Book &book1, Book &book2) {return book1.isbn_ < book2.isbn_;});
+    sort(book_list.begin(), book_list.end(), [](Book &book1, Book &book2) {return strcmp(book1.isbn_, book2.isbn_) < 0;});
     if(book_list.empty()) {
       printf("\n");
     }
