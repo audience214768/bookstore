@@ -20,7 +20,6 @@ private:
   /* your code here */
   fstream file;
   string file_name;
-  int count = 0;
   int sizeofT = sizeof(T);
   Cache<int, T> cache;
 public:
@@ -54,7 +53,9 @@ public:
   }
 
   int size() {
-    return count;
+    file.seekg(0, std::ios::end);
+    int offset = file.tellg();
+    return (offset - info_len * sizeof(int)) / sizeofT;
   }
 
   // 读出第n个int的值赋给tmp，1_base
@@ -86,7 +87,6 @@ public:
       file.seekp(0, std::ios::end);
       int size = file.tellp();
       file.write(reinterpret_cast<const char *>(&t), sizeofT);
-      count ++;
       int index = (size - info_len * sizeof(int)) / sizeofT;
       auto ret = cache.Put(index, t, 0);
       if(ret.first && ret.second.is_dirty_) {
@@ -104,7 +104,6 @@ public:
     int size = file.tellp();
     file.seekp(offset);
     file.write(reinterpret_cast<const char *>(&t), sizeofT);
-    count++;
     auto ret = cache.Put(head, t, 0);
     if(ret.first && ret.second.is_dirty_) {
       size_t offset = sizeof(int) * info_len + sizeofT * ret.second.key_;
@@ -160,7 +159,6 @@ public:
     file.seekp(offset);
     file.write(reinterpret_cast<char *>(&head), sizeof(int));
     write_info(index, 2);
-    count--;
   }
   T operator[](int index) {
     T t;
@@ -169,6 +167,7 @@ public:
   }
   void tranverse(std::function<void(T &)> callback) {
     //std::cerr << count << std::endl;
+    int count = size();
     for(int i = 0; i < count; i++) {
       T t;
       //std::cerr << i << std::endl;

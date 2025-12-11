@@ -178,7 +178,7 @@ void UserManager::SelectBook(size_t index) {
   log_stack_.back().index_book_ = index;
 }
 
-BookManager::BookManager():book_list_("../data/book.dat"), isbn_book_("../data/book_isbn.dat"), name_book_("../data/book_name.data"), author_book_("../data/book_author.data"), key_book_("../data/book_key.dat") {}
+BookManager::BookManager():book_list_("../data/book.dat"), isbn_book_("../data/book_isbn.dat"), name_book_("../data/book_name.dat"), author_book_("../data/book_author.dat"), key_book_("../data/book_key.dat") {}
 
 int BookManager::UnrollIsbn(std::string isbn) {
   auto book_index = isbn_book_[isbn];
@@ -234,7 +234,7 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
     if(new_author.length() > 60) {
       throw Exception("modify : the authorname is longer than 20");
     }
-    author_book_.Delete(new_author, index);
+    author_book_.Delete(book.author_, index);
     //std::cerr << new_author << std::endl;
     strncpy(book.author_, new_author.c_str(), new_author.length());
     book.author_[new_author.length()] = '\0';
@@ -349,11 +349,15 @@ SystemLog BookManager::Buy(std::string isbn, int quantity) {
 }
 
 LogManager::LogManager():finance_log_("../data/finance_log.log"), system_log("../data/system_log.log") {
-  finance_log_.write(FinanceLog(0, 0));
+  if(finance_log_.size() == 0) {
+    finance_log_.write(FinanceLog(0, 0));
+  }
+  
 }
 
 void LogManager::AddFinancialLog(double amount) {
   FinanceLog last_log = finance_log_[finance_log_.size() - 1];
+  std::cerr << last_log.positive_amount_ << " " << last_log.minus_amount_ << std::endl;
   if (amount > 0) {
     finance_log_.write(FinanceLog(last_log.positive_amount_ + amount, last_log.minus_amount_));
   } else {
