@@ -72,32 +72,33 @@ int main() {
   while(std::getline(std::cin, command)) {
     std::vector<std::string> args;
     std::stringstream ss(command);
-    std::string type;
-    ss >> type;
-    if (type == "") {
-      continue;
-    }
-    if (type == "show") {
-      std::string temp;
-      ss >> temp;
-      if (temp == "finance") {
-        type += " " + temp;
-      } else if(temp != "") {
-        args.push_back(temp);
+    std::string arg_line = ss.str();
+    std::string current_arg;
+    bool is_inquote = 0;
+    for (auto c : arg_line) {
+      if (c == '"') {
+        current_arg += c;
+        is_inquote = !is_inquote;
+      } else if (c == ' ') {
+        if (is_inquote) {
+          current_arg += c;
+        } else {
+          if(current_arg != "") {
+            args.push_back(current_arg);
+          }
+          //std::cerr << current_arg << std::endl;
+          current_arg = "";
+        }
+      } else {
+        current_arg += c;
       }
     }
-    if(type == "report") {
-      std::string temp;
-      ss >> temp;
-      type += " " + temp;
-    }
-    std::string temp;
-    while(ss >> temp) {
-      args.push_back(temp);
+    if(current_arg != "") {
+      args.push_back(current_arg);
     }
     //std::cerr << "finish parse" << std::endl;
     try{
-      auto cmd = CreatCommand(type);
+      auto cmd = CreatCommand(args[0]);
       //std::cerr << "creat command" << std::endl;
       cmd->run(args);
       //std::cerr << "finish " << type << std::endl;

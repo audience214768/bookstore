@@ -197,7 +197,7 @@ int BookManager::UnrollIsbn(std::string isbn) {
     expect(isbn).toBeLength(1, 20).toMatch("^[\\x21-\\x7E]+$");
   } catch(...) {
     throw Exception("modify : invalid isbn");
-   }
+  }
   auto book_index = isbn_book_[isbn];
   if (book_index.empty()) {
     int index = book_list_.write(Book(isbn.c_str()));
@@ -307,6 +307,11 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
 void BookManager::Show(const std::string show[]) {
   //std::cerr << "show" << std::endl;
   if (show[0] != "") {
+    try {
+      expect(show[0]).toBeLength(1, 20).toMatch("^[\\x21-\\x7E]+$");
+    } catch(...) {
+      throw Exception("modify : invalid isbn");
+    }
     auto book_index = isbn_book_[show[0]];
     if(book_index.empty()) {
       printf("\n");
@@ -316,6 +321,11 @@ void BookManager::Show(const std::string show[]) {
     printf("%s\t%s\t%s\t%s\t%.2lf\t%d\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
   } else if (show[1] != "") {
     //std::cerr << show[1] << std::endl;
+    try {
+      expect(show[1]).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+    } catch(...) {
+      throw Exception("modify : invalid bookname");
+    }
     auto book_index = name_book_[show[1]];
     std::vector<Book> book_list;
     for (auto it : book_index) {
@@ -329,6 +339,11 @@ void BookManager::Show(const std::string show[]) {
       printf("%s\t%s\t%s\t%s\t%.2lf\t%d\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
     }
   } else if (show[2] != "") {
+    try {
+      expect(show[2]).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+    } catch(...) {
+      throw Exception("modify : invalid authorname");
+    }
     auto book_index = author_book_[show[2]];
     std::vector<Book> book_list;
     for (auto it : book_index) {
@@ -342,6 +357,11 @@ void BookManager::Show(const std::string show[]) {
       printf("%s\t%s\t%s\t%s\t%.2lf\t%d\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
     }
   } else if (show[3] != "") {
+    try {
+      expect(show[3]).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+    } catch(...) {
+      throw Exception("modify : invalid keyword");
+    }
     auto book_index = key_book_[show[3]];
     std::vector<Book> book_list;
     for (auto it : book_index) {
