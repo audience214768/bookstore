@@ -99,6 +99,9 @@ int main() {
       args.push_back(current_arg);
     }
     //std::cerr << "finish parse" << std::endl;
+    if(args.size() == 0) {
+      continue;
+    }
     try{
       auto cmd = CreatCommand(args);
       //std::cerr << "creat command" << std::endl;
