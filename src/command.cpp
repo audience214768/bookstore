@@ -339,6 +339,9 @@ void BuyBook::Execute(const std::vector<std::string> &args) {
   } catch(...) {
     throw Exception("buy : quantity need to be num");
   }
+  if(quantity <= 0) {
+    throw Exception("buy : need buy postive num");
+  }
   SystemLog log = book_manager_->Buy(args[1], quantity);
   strcpy(log.userid_, current_user.userid_);
   log_manager_->AddSystemLog(log);
@@ -365,6 +368,9 @@ void ShowFinance::Execute(const std::vector<std::string> &args) {
       }
     } catch(...) {
       throw Exception("show finance : count need to be num");
+    }
+    if(count < 0) {
+      throw Exception("show finance : count need be postive");
     }
     log_manager_->ShowFinance(count);
     return ;

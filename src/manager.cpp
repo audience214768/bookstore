@@ -301,6 +301,9 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
     if(pos != modify[4].length()) {
       throw Exception("modify : price need to be num");
     }
+    if(price < -1e-7) {
+      throw Exception("modify : price need to be postive");
+    }
     book.price_ = price;
   }
   book_list_.update(book, index);
