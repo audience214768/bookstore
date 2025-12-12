@@ -86,9 +86,9 @@ int main() {
           current_arg += c;
         } else {
           if(current_arg != "") {
+            //std::cerr << current_arg << std::endl;
             args.push_back(current_arg);
           }
-          //std::cerr << current_arg << std::endl;
           current_arg = "";
         }
       } else {
@@ -96,6 +96,7 @@ int main() {
       }
     }
     if(current_arg != "") {
+      //std::cerr << current_arg << std::endl;
       args.push_back(current_arg);
     }
     //std::cerr << "finish parse" << std::endl;

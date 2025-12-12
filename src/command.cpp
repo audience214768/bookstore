@@ -208,6 +208,9 @@ void ModifyBook::Execute(const std::vector<std::string> &args) {
   if(session.index_book_ == -1) {
     throw Exception("modify : havn't selected a book");
   }
+  if(args.size() <= 1) {
+    throw Exception("modify : at least 1 argument");
+  }
   std::string modify[5] = {""};
   std::string detail;
   for(int i = 1; i < args.size(); i++) {
