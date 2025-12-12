@@ -83,18 +83,24 @@ SystemLog UserManager::Logout() {
 }
 
 SystemLog UserManager::Register(std::string id, std::string pwd, std::string name) {
+  try {
+    expect(id).toBeLength(1, 30).toMatch("^[a-zA-Z0-9_]+$");
+  } catch(...) {
+    throw Exception("register : invalid id");
+  }
+  try {
+    expect(pwd).toBeLength(1, 30).toMatch("^[a-zA-Z0-9_]+$");
+  } catch(...) {
+    throw Exception("register : invalid pwd");
+  }
+  try {
+    expect(name).toBeLength(1, 30).toMatch("^[\\x21-\\x7E]+$");
+  } catch(...) {
+    throw Exception("register : invalid name");
+  }
   auto user_index = id_user_[id];
   if(!user_index.empty()) {
     throw Exception("Register : the id is used");
-  }
-  if(id.length() > 30) {
-    throw Exception("Register : the length of id should be less than 30");
-  }
-  if(pwd.length() > 30) {
-    throw Exception("Register : the length of pwd should be less than 30");
-  }
-  if(name.length() > 30) {
-    throw Exception("Register : the length of name should be less than 30");
   }
   int index = user_list_.write(User(id.c_str(), pwd.c_str(), name.c_str(), CUSTOMER));
   id_user_.Insert(id, index);
@@ -106,8 +112,10 @@ SystemLog UserManager::Passwd(std::string id, std::string new_pwd, std::string o
   if(user_index.empty()) {
     throw Exception("Passwd : the id is not exist");
   }
-  if(new_pwd.length() > 30) {
-    throw Exception("Register : the length of pwd should be less than 30");
+  try {
+    expect(new_pwd).toBeLength(1, 30).toMatch("^[a-zA-Z0-9_]+$");
+  } catch(...) {
+    throw Exception("passwd : invalid new_pwd");
   }
   size_t index = user_index[0];
   User user = user_list_[index];
@@ -125,17 +133,30 @@ SystemLog UserManager::Passwd(std::string id, std::string new_pwd, std::string o
       user_list_.update(user, index);
       return SystemLog(id.c_str(), "modify the pwd", user.userid_, 0, 0, "");
     } else {
-      std::stringstream ss;
-      ss << "Passwd : pwd is wrong";
-      throw Exception(ss.str());
+      throw Exception("passwd : pwd is wrong");
     }
   }
 }
 
 SystemLog UserManager::UserAdd(std::string id, std::string pwd, int privilege, std::string name) {
+  try {
+    expect(id).toBeLength(1, 30).toMatch("^[a-zA-Z0-9_]+$");
+  } catch(...) {
+    throw Exception("useradd : invalid id");
+  }
+  try {
+    expect(pwd).toBeLength(1, 30).toMatch("^[a-zA-Z0-9_]+$");
+  } catch(...) {
+    throw Exception("useradd : invalid pwd");
+  }
+  try {
+    expect(name).toBeLength(1, 30).toMatch("^[\\x21-\\x7E]+$");
+  } catch(...) {
+    throw Exception("useradd : invalid name");
+  }
   auto user_index = id_user_[id];
   if(!user_index.empty()) {
-    throw Exception("UserAdd : the id is used");
+    throw Exception("userAdd : the id is used");
   }
   Session session = GetTopSession();
   User current_user = user_list_[session.index_user_];
@@ -143,15 +164,6 @@ SystemLog UserManager::UserAdd(std::string id, std::string pwd, int privilege, s
     std::stringstream ss;
     ss << "UserAdd : current user : " << current_user.userid_ << " don't have enough privilege : " << current_user.privilege_ << " to add this privilege user";
     throw Exception(ss.str());
-  }
-  if(id.length() > 30) {
-    throw Exception("Register : the length of id should be less than 30");
-  }
-  if(pwd.length() > 30) {
-    throw Exception("Register : the length of pwd should be less than 30");
-  }
-  if(name.length() > 30) {
-    throw Exception("Register : the length of name should be less than 30");
   }
   int index = user_list_.write(User(id.c_str(), pwd.c_str(), name.c_str(), privilege));
   id_user_.Insert(id, index);
@@ -181,6 +193,11 @@ void UserManager::SelectBook(size_t index) {
 BookManager::BookManager():book_list_("book.dat"), isbn_book_("book_isbn.dat"), name_book_("book_name.dat"), author_book_("book_author.dat"), key_book_("book_key.dat") {}
 
 int BookManager::UnrollIsbn(std::string isbn) {
+  try {
+    expect(isbn).toBeLength(1, 20).toMatch("^[\\x21-\\x7E]+$");
+  } catch(...) {
+    throw Exception("modify : invalid isbn");
+   }
   auto book_index = isbn_book_[isbn];
   if (book_index.empty()) {
     int index = book_list_.write(Book(isbn.c_str()));
@@ -203,11 +220,13 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
   Book book = book_list_[index];
   if (modify[0] != "") {
     std::string new_isbn = modify[0];
+    try {
+      expect(new_isbn).toBeLength(1, 20).toMatch("^[\\x21-\\x7E]+$");
+    } catch(...) {
+      throw Exception("modify : invalid isbn");
+    }
     if (book.isbn_ == new_isbn) {
       throw Exception("modify : the isbn is the same");
-    }
-    if(new_isbn.length() > 20) {
-      throw Exception("modify : the isbn is longer than 20");
     }
     auto book_index = isbn_book_[new_isbn];
     if(!book_index.empty()) {
@@ -220,8 +239,10 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
   }
   if (modify[1] != "") {
     std::string new_name = modify[1];
-    if(new_name.length() > 60) {
-      throw Exception("modify : the bookname is longer than 60");
+    try {
+      expect(new_name).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+    } catch(...) {
+      throw Exception("modify : invalid bookname");
     }
     name_book_.Delete(book.bookname_, index);
     //std::cerr << new_name << std::endl;
@@ -231,8 +252,10 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
   }
   if (modify[2] != "") {
     std::string new_author = modify[2];
-    if(new_author.length() > 60) {
-      throw Exception("modify : the authorname is longer than 20");
+    try {
+      expect(new_author).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+    } catch(...) {
+      throw Exception("modify : invalid authorname");
     }
     author_book_.Delete(book.author_, index);
     //std::cerr << new_author << std::endl;
@@ -242,8 +265,10 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
   }
   if (modify[3] != "") {
     std::string new_keyword = modify[3];
-    if(new_keyword.length() > 60) {
-      throw Exception("modify : the keyword is longer than 20");
+    try {
+      expect(new_keyword).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+    } catch(...) {
+      throw Exception("modify : invalid keyword");
     }
     std::stringstream ss_old(std::string(book.keyword_));
     std::string key;
@@ -264,9 +289,13 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
   }
   if (modify[4] != "") {
     double price;
+    size_t pos;
     try {
-      price = std::stod(modify[4]);
+      price = std::stod(modify[4], &pos);
     } catch(...) {
+      throw Exception("modify : price need to be num");
+    }
+    if(pos != modify[4].length()) {
       throw Exception("modify : price need to be num");
     }
     book.price_ = price;
@@ -335,6 +364,11 @@ void BookManager::Show(const std::string show[]) {
 }
 
 SystemLog BookManager::Buy(std::string isbn, int quantity) {
+  try {
+    expect(isbn).toBeLength(1, 20).toMatch("^[\\x21-\\x7E]+$");
+  } catch(...) {
+    throw Exception("buy : invalid isbn");
+  }
   auto book_index = isbn_book_[isbn];
   if(book_index.empty()) {
     throw Exception("buy : don't have this book");
@@ -362,7 +396,6 @@ LogManager::LogManager():finance_log_("finance.log"), system_log("system.log") {
 
 void LogManager::AddFinancialLog(double amount) {
   FinanceLog last_log = finance_log_[finance_log_.size() - 1];
-  std::cerr << last_log.positive_amount_ << " " << last_log.minus_amount_ << std::endl;
   if (amount > 0) {
     finance_log_.write(FinanceLog(last_log.positive_amount_ + amount, last_log.minus_amount_));
   } else {

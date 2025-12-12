@@ -86,6 +86,16 @@ public:
     check(std::regex_match(value, reg));
     return *this;
   }
+  template<typename checkType = T>
+  auto toBeLength(int min, int max) -> std::enable_if_t<is_basic_string<checkType>::value, Expect&> {
+    check(value.length() >= min && value.length() <= max);
+    return *this;
+  }
 };
+
+template<class T>
+Expect<T> expect(const T &t) {
+    return Expect<T>(t);
+}
 
 #endif
