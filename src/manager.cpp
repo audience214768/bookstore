@@ -273,6 +273,9 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
     std::stringstream ss_old(std::string(book.keyword_));
     std::string key;
     while (getline(ss_old, key, '|')) {
+      if(key.empty()) {
+        throw Exception("modify : blank key");
+      }
       key_book_.Delete(key, index);
     }
     std::stringstream ss_new(new_keyword);

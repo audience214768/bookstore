@@ -173,8 +173,15 @@ void ImportBook::Execute(const std::vector<std::string> &args) {
   
   double total_cast;
   try {
-    quantity = std::stod(args[1]);
-    total_cast = std::stod(args[2]);
+    size_t pos;
+    quantity = std::stod(args[1], &pos);
+    if(pos != args[1].length()) {
+      throw Exception("");
+    }
+    total_cast = std::stod(args[2], &pos);
+    if(pos != args[2].length()) {
+      throw Exception("");
+    }
   } catch(...) {
     throw Exception("import : arg need to bu num");
   }
@@ -321,7 +328,11 @@ void BuyBook::Execute(const std::vector<std::string> &args) {
   User current_user = user_manager_->GetUser(user_manager_->GetTopSession().index_user_);
   int quantity;
   try {
-    quantity = std::stod(args[2]);
+    size_t pos;
+    quantity = std::stod(args[2], &pos);
+    if(pos != args[2].length()) {
+      throw Exception("");
+    }
   } catch(...) {
     throw Exception("buy : quantity need to be num");
   }
@@ -344,7 +355,11 @@ void ShowFinance::Execute(const std::vector<std::string> &args) {
   if(args.size() == 3) {
     int count;
     try {
-      count = std::stod(args[2]);
+      size_t pos;
+      count = std::stod(args[2], &pos);
+      if(pos != args[2].length()) {
+        throw Exception("");
+      }
     } catch(...) {
       throw Exception("show finance : count need to be num");
     }
