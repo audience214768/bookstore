@@ -232,10 +232,6 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
     if(!book_index.empty()) {
       throw Exception("modify : the isbn is used");
     }
-    isbn_book_.Delete(book.isbn_, index);
-    strncpy(book.isbn_, new_isbn.c_str(), new_isbn.length());
-    book.isbn_[new_isbn.length()] = '\0';
-    isbn_book_.Insert(new_isbn, index);
   }
   if (modify[1] != "") {
     std::string new_name = modify[1];
@@ -244,11 +240,6 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
     } catch(...) {
       throw Exception("modify : invalid bookname");
     }
-    name_book_.Delete(book.bookname_, index);
-    //std::cerr << new_name << std::endl;
-    strncpy(book.bookname_, new_name.c_str(), new_name.length());
-    book.bookname_[new_name.length()] = '\0';
-    name_book_.Insert(new_name, index);
   }
   if (modify[2] != "") {
     std::string new_author = modify[2];
@@ -257,11 +248,6 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
     } catch(...) {
       throw Exception("modify : invalid authorname");
     }
-    author_book_.Delete(book.author_, index);
-    //std::cerr << new_author << std::endl;
-    strncpy(book.author_, new_author.c_str(), new_author.length());
-    book.author_[new_author.length()] = '\0';
-    author_book_.Insert(new_author, index);
   }
   if (modify[3] != "") {
     std::string new_keyword = modify[3];
@@ -270,25 +256,18 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
     } catch(...) {
       throw Exception("modify : invalid keyword");
     }
-    std::stringstream ss_old(std::string(book.keyword_));
     std::string key;
-    while (getline(ss_old, key, '|')) {
-      if(key.empty()) {
-        throw Exception("modify : blank key");
-      }
-      key_book_.Delete(key, index);
-    }
     std::stringstream ss_new(new_keyword);
     std::set<std::string> key_set;
     while (getline(ss_new, key, '|')) {
+      if(key.empty()) {
+        throw Exception("modify : blank key");
+      }
       if(key_set.count(key)) {
         throw Exception("modfiy : have same keyword");
       }
       key_set.insert(key);
-      key_book_.Insert(key, index);
     }
-    strncpy(book.keyword_, new_keyword.c_str(), new_keyword.length());
-    book.keyword_[new_keyword.length()] = '\0';
   }
   if (modify[4] != "") {
     double price;
@@ -304,6 +283,48 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
     if(price < -1e-7) {
       throw Exception("modify : price need to be postive");
     }
+  }
+  if(modify[0] != "") {
+    std::string new_isbn = modify[0];
+    isbn_book_.Delete(book.isbn_, index);
+    strncpy(book.isbn_, new_isbn.c_str(), new_isbn.length());
+    book.isbn_[new_isbn.length()] = '\0';
+    isbn_book_.Insert(new_isbn, index);
+  }
+  if(modify[1] != "") {
+    std::string new_name = modify[1];
+    name_book_.Delete(book.bookname_, index);
+    //std::cerr << new_name << std::endl;
+    strncpy(book.bookname_, new_name.c_str(), new_name.length());
+    book.bookname_[new_name.length()] = '\0';
+    name_book_.Insert(new_name, index);
+  }
+  if(modify[2] != "") {
+    std::string new_author = modify[2];
+    author_book_.Delete(book.author_, index);
+    //std::cerr << new_author << std::endl;
+    strncpy(book.author_, new_author.c_str(), new_author.length());
+    book.author_[new_author.length()] = '\0';
+    author_book_.Insert(new_author, index);
+  }
+  if(modify[3] != "") {
+    std::string new_keyword = modify[3];
+    std::stringstream ss_old(std::string(book.keyword_));
+    std::string key;
+    while (getline(ss_old, key, '|')) {
+      key_book_.Delete(key, index);
+    }
+    std::stringstream ss_new(new_keyword);
+    std::set<std::string> key_set;
+    while (getline(ss_new, key, '|')) {
+      key_set.insert(key);
+      key_book_.Insert(key, index);
+    }
+    strncpy(book.keyword_, new_keyword.c_str(), new_keyword.length());
+    book.keyword_[new_keyword.length()] = '\0';
+  }
+  if(modify[4] != "") {
+    double price = std::stod(modify[4]);
     book.price_ = price;
   }
   book_list_.update(book, index);
