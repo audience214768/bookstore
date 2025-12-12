@@ -337,14 +337,14 @@ int ShowFinance::NeedPrivilege() const { return ADMIN; }
 
 void ShowFinance::Execute(const std::vector<std::string> &args) {
   //std::cerr << "Logout" << std::endl;
-  if(args.size() == 1) {
+  if(args.size() == 2) {
     log_manager_->ShowFinance();
     return ;
   }
-  if(args.size() == 2) {
+  if(args.size() == 3) {
     int count;
     try {
-      count = std::stod(args[1]);
+      count = std::stod(args[2]);
     } catch(...) {
       throw Exception("show finance : count need to be num");
     }

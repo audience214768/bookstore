@@ -8,7 +8,8 @@
 #include "utils.hpp"
 #include "journal.hpp"
 
-std::unique_ptr<Command> CreatCommand(std::string type) {
+std::unique_ptr<Command> CreatCommand(const std::vector<std::string> &args) {
+  std::string type = args[0];
   if(type == "exit" || type == "quit") {
     return std::make_unique<Exit>();
   }
@@ -40,13 +41,14 @@ std::unique_ptr<Command> CreatCommand(std::string type) {
     return std::make_unique<ModifyBook>();
   }
   if(type == "show") {
-    return std::make_unique<ShowBook>();
+    if(args[1] == "finance") {
+      return std::make_unique<ShowFinance>();
+    } else {
+      return std::make_unique<ShowBook>();
+    }
   }
   if(type == "buy") {
     return std::make_unique<BuyBook>();
-  }
-  if(type == "show finance") {
-    return std::make_unique<ShowFinance>();
   }
   if(type == "log") {
     return std::make_unique<ShowLog>();
@@ -98,7 +100,7 @@ int main() {
     }
     //std::cerr << "finish parse" << std::endl;
     try{
-      auto cmd = CreatCommand(args[0]);
+      auto cmd = CreatCommand(args);
       //std::cerr << "creat command" << std::endl;
       cmd->run(args);
       //std::cerr << "finish " << type << std::endl;
