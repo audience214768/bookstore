@@ -225,6 +225,9 @@ void ModifyBook::Execute(const std::vector<std::string> &args) {
   for(int i = 1; i < args.size(); i++) {
     std::string arg = args[i];
     detail = detail + arg + " ";
+    if(arg[0] != '-') {
+      throw Exception("modify : arg should begin with -");
+    }
     auto it = arg.find("=");
     std::string type = arg.substr(1, it - 1);
     std::string info = arg.substr(it + 1);
@@ -296,6 +299,9 @@ void ShowBook::Execute(const std::vector<std::string> &args) {
     return ;
   }
   if (args.size() == 2) {
+    if(args[1][0] != '-') {
+      throw Exception("show : arg should begin with -");
+    }
     auto it = args[1].find("=");
     std::string type = args[1].substr(1, it - 1);
     std::string info = args[1].substr(it + 1);
