@@ -352,6 +352,7 @@ void BuyBook::Execute(const std::vector<std::string> &args) {
   long long quantity;
   try {
     size_t pos;
+    expect(args[2]).toBeLength(1, 10);
     quantity = std::stoll(args[2], &pos);
     expect(quantity).ge(1).le(2147483647);
     if(pos != args[2].length()) {

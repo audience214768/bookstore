@@ -21,7 +21,7 @@ struct Book {
   char bookname_[61];
   char author_[61];
   char keyword_[61];
-  int quantity_ = 0;
+  long long quantity_ = 0;
   double price_ = 0;
   double total_cast_ = 0;
   Book() = default;

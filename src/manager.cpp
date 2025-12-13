@@ -241,13 +241,10 @@ int BookManager::UnrollIsbn(std::string isbn) {
 
 SystemLog BookManager::Import(size_t index, int quantity) {
   Book book = book_list_[index];
-  if((long long)book.quantity_ + quantity <= 2147483647) {
-    book.quantity_ += quantity;
-    book_list_.update(book, index);
-    return SystemLog("", "import", book.isbn_, quantity, 0, "");
-  } else {
-    throw Exception("import : quantity is too much");
-  }
+  book.quantity_ += quantity;
+  book_list_.update(book, index);
+  return SystemLog("", "import", book.isbn_, quantity, 0, "");
+  
 }
 
 SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
@@ -379,7 +376,7 @@ void BookManager::Show(const std::string show[]) {
       return ;
     }
     Book book = book_list_[book_index[0]];
-    printf("%s\t%s\t%s\t%s\t%.2lf\t%d\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
+    printf("%s\t%s\t%s\t%s\t%.2lf\t%lld\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
   } else if (show[1] != "") {
     //std::cerr << show[1] << std::endl;
     try {
@@ -397,7 +394,7 @@ void BookManager::Show(const std::string show[]) {
       printf("\n");
     }
     for (auto book : book_list) {
-      printf("%s\t%s\t%s\t%s\t%.2lf\t%d\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
+      printf("%s\t%s\t%s\t%s\t%.2lf\t%lld\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
     }
   } else if (show[2] != "") {
     try {
@@ -415,7 +412,7 @@ void BookManager::Show(const std::string show[]) {
       printf("\n");
     }
     for (auto book : book_list) {
-      printf("%s\t%s\t%s\t%s\t%.2lf\t%d\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
+      printf("%s\t%s\t%s\t%s\t%.2lf\t%lld\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
     }
   } else if (show[3] != "") {
     try {
@@ -433,14 +430,14 @@ void BookManager::Show(const std::string show[]) {
       printf("\n");
     }
     for (auto book : book_list) {
-      printf("%s\t%s\t%s\t%s\t%.2lf\t%d\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
+      printf("%s\t%s\t%s\t%s\t%.2lf\t%lld\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
     }
   } else {
     bool have_book = 0;
     auto PrintBook = [&, this](int index) {
       have_book = 1;
       Book book = book_list_[index];
-      printf("%s\t%s\t%s\t%s\t%.2lf\t%d\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
+      printf("%s\t%s\t%s\t%s\t%.2lf\t%lld\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
     };
     isbn_book_.traverse(PrintBook);
     if(!have_book) {
