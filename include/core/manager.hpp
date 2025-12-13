@@ -42,7 +42,7 @@ public:
   BookManager();
   const Book GetBook(size_t);
   int UnrollIsbn(std::string);
-  SystemLog Buy(std::string, int);
+  SystemLog Buy(std::string, long long);
   SystemLog Modify(size_t, const std::string []);
   SystemLog Import(size_t, int);
   void Show(const std::string []);

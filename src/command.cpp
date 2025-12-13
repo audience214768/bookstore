@@ -169,12 +169,15 @@ void ImportBook::Execute(const std::vector<std::string> &args) {
   if(session.index_book_ == -1) {
     throw Exception("Import : havn't selected a book");
   }
-  int quantity;
+  long long quantity;
   
   double total_cast;
   try {
+    expect(args[1]).toBeLength(1, 10);
+    expect(args[2]).toBeLength(1, 13);
     size_t pos;
     quantity = std::stod(args[1], &pos);
+    expect(quantity).le(2147683647);
     if(pos != args[1].length()) {
       throw Exception("");
     }
@@ -183,7 +186,7 @@ void ImportBook::Execute(const std::vector<std::string> &args) {
       throw Exception("");
     }
   } catch(...) {
-    throw Exception("import : arg need to bu num");
+    throw Exception("import : arg need to be num");
   }
   if(quantity <= 0) {
     throw Exception("Import : the quantity is not postive");
@@ -254,6 +257,11 @@ void ModifyBook::Execute(const std::vector<std::string> &args) {
     } else if (type == "price") {
       if (modify[4] != "") {
         throw Exception("modify : multiple price");
+      }
+      try {
+        expect(modify[4]).toBeLength(1, 13);
+      } catch(...) {
+        throw Exception("modify : invalid price");
       }
       modify[4] = info;
     } else {
@@ -329,18 +337,16 @@ void BuyBook::Execute(const std::vector<std::string> &args) {
     throw Exception(ss.str());
   }
   User current_user = user_manager_->GetUser(user_manager_->GetTopSession().index_user_);
-  int quantity;
+  long long quantity;
   try {
     size_t pos;
     quantity = std::stod(args[2], &pos);
+    expect(quantity).ge(1).le(2147683647);
     if(pos != args[2].length()) {
       throw Exception("");
     }
   } catch(...) {
-    throw Exception("buy : quantity need to be num");
-  }
-  if(quantity <= 0) {
-    throw Exception("buy : need buy postive num");
+    throw Exception("buy : invalid quantity");
   }
   SystemLog log = book_manager_->Buy(args[1], quantity);
   strcpy(log.userid_, current_user.userid_);

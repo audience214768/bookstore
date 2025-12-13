@@ -415,7 +415,7 @@ void BookManager::Show(const std::string show[]) {
   }
 }
 
-SystemLog BookManager::Buy(std::string isbn, int quantity) {
+SystemLog BookManager::Buy(std::string isbn, long long quantity) {
   try {
     expect(isbn).toBeLength(1, 20).toMatch("^[\\x21-\\x7E]+$");
   } catch(...) {
