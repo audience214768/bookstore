@@ -459,9 +459,6 @@ SystemLog BookManager::Buy(std::string isbn, long long quantity) {
   if(book_index.empty()) {
     throw Exception("buy : don't have this book");
   }
-  if(quantity <= 0) {
-    throw Exception("buy : you should buy postive num book");
-  }
   int index = book_index[0];
   Book book = book_list_[index];
   if(quantity > book.quantity_) {
@@ -499,7 +496,7 @@ void LogManager::ShowFinance(int count) {
     printf("\n");
     return ;
   }
-  if(count > finance_log_.size()) {
+  if(count >= finance_log_.size()) {
     throw Exception("showfinance : the count should less than max_count");
   }
   FinanceLog past_log = finance_log_[finance_log_.size() - count - 1];
