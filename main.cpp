@@ -41,7 +41,7 @@ std::unique_ptr<Command> CreatCommand(const std::vector<std::string> &args) {
     return std::make_unique<ModifyBook>();
   }
   if(type == "show") {
-    if(args[1] == "finance") {
+    if(args[1].size() > 1 && args[1] == "finance") {
       return std::make_unique<ShowFinance>();
     } else {
       return std::make_unique<ShowBook>();

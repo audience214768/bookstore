@@ -195,6 +195,11 @@ SystemLog UserManager::UserAdd(std::string id, std::string pwd, int privilege, s
 }
 
 SystemLog UserManager::Delete(std::string id) {
+  try {
+    expect(id).toBeLength(1, 30).toMatch("^[a-zA-Z0-9_]+$");
+  } catch(...){
+    throw Exception("delete : invalid id");
+  }
   auto user_index = id_user_[id];
   if(user_index.empty()) {
     throw Exception("Delete : the id is not exist");
@@ -207,7 +212,8 @@ SystemLog UserManager::Delete(std::string id) {
   }
   user_list_.Delete(index);
   id_user_.Delete(id, index);
-  return SystemLog(user_list_[1].userid_, "delete the user", id.c_str(), 0, 0, "");
+  Session session = GetTopSession();
+  return SystemLog(user_list_[session.index_user_].userid_, "delete the user", id.c_str(), 0, 0, "");
 }
 
 void UserManager::SelectBook(size_t index) {
@@ -235,9 +241,13 @@ int BookManager::UnrollIsbn(std::string isbn) {
 
 SystemLog BookManager::Import(size_t index, int quantity) {
   Book book = book_list_[index];
-  book.quantity_ += quantity;
-  book_list_.update(book, index);
-  return SystemLog("", "import", book.isbn_, quantity, 0, "");
+  if((long long)book.quantity_ + quantity <= 2147483647) {
+    book.quantity_ += quantity;
+    book_list_.update(book, index);
+    return SystemLog("", "import", book.isbn_, quantity, 0, "");
+  } else {
+    throw Exception("import : quantity is too much");
+  }
 }
 
 SystemLog BookManager::Modify(size_t index, const std::string modify[]) {

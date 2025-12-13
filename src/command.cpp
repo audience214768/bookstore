@@ -124,7 +124,7 @@ void UserAdd::Execute(const std::vector<std::string> &args) {
   try {
     expect(args[3]).toBeLength(1, 1);
     size_t pos;
-    priviledge = std::stod(args[3], &pos);
+    priviledge = std::stoi(args[3], &pos);
     if(pos != args[3].length()) {
       throw Exception("");
     }
@@ -187,8 +187,8 @@ void ImportBook::Execute(const std::vector<std::string> &args) {
     expect(args[1]).toBeLength(1, 10);
     expect(args[2]).toBeLength(1, 13);
     size_t pos;
-    quantity = std::stod(args[1], &pos);
-    expect(quantity).le(2147683647);
+    quantity = std::stoll(args[1], &pos);
+    expect(quantity).le(2147683647).ge(1);
     if(pos != args[1].length()) {
       throw Exception("");
     }
@@ -196,16 +196,11 @@ void ImportBook::Execute(const std::vector<std::string> &args) {
     if(pos != args[2].length()) {
       throw Exception("");
     }
+    expect(total_cast).ge(1e-7);
   } catch(...) {
-    throw Exception("import : arg need to be num");
+    throw Exception("import : invalid num");
   }
-  if(quantity <= 0) {
-    throw Exception("Import : the quantity is not postive");
-  }
-  if(total_cast <= 1e-7) {
-    throw Exception("Import : the total_cast is not postive");
-  } 
-  SystemLog log = book_manager_->Import(session.index_book_, quantity);
+  SystemLog log = book_manager_->Import(session.index_book_, static_cast<int>(quantity));
   strcpy(log.userid_, user_manager_->GetUser(session.index_user_).userid_);
   log.total_amount_ = total_cast;
   log_manager_->AddSystemLog(log);
@@ -351,7 +346,7 @@ void BuyBook::Execute(const std::vector<std::string> &args) {
   long long quantity;
   try {
     size_t pos;
-    quantity = std::stod(args[2], &pos);
+    quantity = std::stoll(args[2], &pos);
     expect(quantity).ge(1).le(2147683647);
     if(pos != args[2].length()) {
       throw Exception("");
@@ -380,7 +375,7 @@ void ShowFinance::Execute(const std::vector<std::string> &args) {
     try {
       expect(args[2]).toBeLength(1, 10);
       size_t pos;
-      count = std::stod(args[2], &pos);
+      count = std::stoll(args[2], &pos);
       if(pos != args[2].length()) {
         throw Exception("");
       }
