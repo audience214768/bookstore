@@ -268,7 +268,7 @@ void ModifyBook::Execute(const std::vector<std::string> &args) {
         throw Exception("modify : multiple price");
       }
       try {
-        expect(modify[4]).toBeLength(1, 13);
+        expect(info).toBeLength(1, 13);
       } catch(...) {
         throw Exception("modify : invalid price");
       }
