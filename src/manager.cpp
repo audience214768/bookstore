@@ -44,6 +44,11 @@ User UserManager::GetUser(size_t index) {
 
 SystemLog UserManager::Login(std::string id, std::string pwd) {
   //std::cerr << id << std::endl;
+  try {
+    expect(id).toBeLength(1, 30);
+  } catch(...) {
+    throw Exception("login : invalid id");
+  }
   auto user_index = id_user_[id];
   if(user_index.empty()) {
     std::stringstream ss;
@@ -55,18 +60,22 @@ SystemLog UserManager::Login(std::string id, std::string pwd) {
   //std::cerr << user.userid_ << std::endl;
   Session session = GetTopSession();
   User current_user = user_list_[session.index_user_];
-  if(current_user.privilege_ > user.privilege_) {
-    log_stack_.push_back(Session(index));
-  } else {
-    //std::cerr << pwd.c_str() << " " << user.password_ << std::endl;
+
+  if(pwd != "") {
     if (strcmp(pwd.c_str(), user.password_) == 0) {
       log_stack_.push_back(index);
     } else {
-      std::stringstream ss;
-      ss << "Login : pwd is wrong";
-      throw Exception(ss.str());
+      throw Exception("Login : pwd is wrong");
+    }
+  } else {
+    if(current_user.privilege_ > user.privilege_) {
+      log_stack_.push_back(Session(index));
+    } else {
+      throw Exception("Login : need pwd");
     }
   }
+
+  
   //std::cerr << "finish login" << std::endl;
   return SystemLog(id.c_str(), "login", "", 0, 0, "");
 }
@@ -108,6 +117,11 @@ SystemLog UserManager::Register(std::string id, std::string pwd, std::string nam
 }
 
 SystemLog UserManager::Passwd(std::string id, std::string new_pwd, std::string old_pwd) {
+  try {
+    expect(id).toBeLength(1, 30);
+  } catch(...) {
+    throw Exception("passwd : invalid id");
+  }
   auto user_index = id_user_[id];
   if(user_index.empty()) {
     throw Exception("Passwd : the id is not exist");
@@ -121,11 +135,16 @@ SystemLog UserManager::Passwd(std::string id, std::string new_pwd, std::string o
   User user = user_list_[index];
   Session session = GetTopSession();
   User current_user = user_list_[session.index_user_];
-  if(current_user.privilege_ == ADMIN) {
-    strncpy(user.password_, new_pwd.c_str(), new_pwd.length());
-    user.password_[new_pwd.length()] = '\0';
-    user_list_.update(user, index);
-    return SystemLog(current_user.userid_, "modify the pwd", user.userid_, 0, 0, "");
+
+  if (old_pwd == "") {
+    if (current_user.privilege_ == ADMIN) {
+      strncpy(user.password_, new_pwd.c_str(), new_pwd.length());
+      user.password_[new_pwd.length()] = '\0';
+      user_list_.update(user, index);
+      return SystemLog(current_user.userid_, "modify the pwd", user.userid_, 0, 0, "");
+    } else {
+      throw Exception("passwd : nned old pwd");
+    }
   } else {
     if (strcmp(old_pwd.c_str(), user.password_) == 0) {
       strncpy(user.password_, new_pwd.c_str(), new_pwd.length());

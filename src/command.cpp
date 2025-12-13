@@ -120,7 +120,18 @@ void UserAdd::Execute(const std::vector<std::string> &args) {
     ss << "UserAdd : need 4 argument but " << args.size() - 1 << "are given";
     throw Exception(ss.str());
   }
-  SystemLog log = user_manager_->UserAdd(args[1], args[2], args[3][0] - '0', args[4]);
+  int priviledge;
+  try {
+    expect(args[3]).toBeLength(1, 1);
+    size_t pos;
+    priviledge = std::stod(args[3], &pos);
+    if(pos != args[3].length()) {
+      throw Exception("");
+    }
+  } catch(...) {
+    throw Exception("useradd : invalid priviledge");
+  }
+  SystemLog log = user_manager_->UserAdd(args[1], args[2], priviledge, args[4]);
   strcpy(log.info_, ("priv = " + args[3] + " name = " + args[4]).c_str());
   log_manager_->AddSystemLog(log);
 }
