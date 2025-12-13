@@ -270,7 +270,7 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
   if (modify[1] != "") {
     std::string new_name = modify[1];
     try {
-      expect(new_name).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+      expect(new_name).toBeLength(1, 60).toMatch("^[\\x21\\x23-\\x7E]+$");
     } catch(...) {
       throw Exception("modify : invalid bookname");
     }
@@ -278,7 +278,7 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
   if (modify[2] != "") {
     std::string new_author = modify[2];
     try {
-      expect(new_author).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+      expect(new_author).toBeLength(1, 60).toMatch("^[\\x21\\x23-\\x7E]+$");
     } catch(...) {
       throw Exception("modify : invalid authorname");
     }
@@ -286,7 +286,7 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
   if (modify[3] != "") {
     std::string new_keyword = modify[3];
     try {
-      expect(new_keyword).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+      expect(new_keyword).toBeLength(1, 60).toMatch("^[\\x21\\x23-\\x7E]+$");
     } catch(...) {
       throw Exception("modify : invalid keyword");
     }
@@ -383,7 +383,7 @@ void BookManager::Show(const std::string show[]) {
   } else if (show[1] != "") {
     //std::cerr << show[1] << std::endl;
     try {
-      expect(show[1]).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+      expect(show[1]).toBeLength(1, 60).toMatch("^[\\x21\\x23-\\x7E]+$");
     } catch(...) {
       throw Exception("modify : invalid bookname");
     }
@@ -401,7 +401,7 @@ void BookManager::Show(const std::string show[]) {
     }
   } else if (show[2] != "") {
     try {
-      expect(show[2]).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+      expect(show[2]).toBeLength(1, 60).toMatch("^[\\x21\\x23-\\x7E]+$");
     } catch(...) {
       throw Exception("modify : invalid authorname");
     }
@@ -419,7 +419,7 @@ void BookManager::Show(const std::string show[]) {
     }
   } else if (show[3] != "") {
     try {
-      expect(show[3]).toBeLength(1, 60).toMatch("^[\\x20-\\x21\\x23-\\x7E]+$");
+      expect(show[3]).toBeLength(1, 60).toMatch("^[\\x21\\x23-\\x7E]+$");
     } catch(...) {
       throw Exception("modify : invalid keyword");
     }
