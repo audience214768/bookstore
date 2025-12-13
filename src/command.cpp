@@ -188,7 +188,7 @@ void ImportBook::Execute(const std::vector<std::string> &args) {
     expect(args[2]).toBeLength(1, 13);
     size_t pos;
     quantity = std::stoll(args[1], &pos);
-    expect(quantity).le(2147683647).ge(1);
+    expect(quantity).le(2147483647).ge(1);
     if(pos != args[1].length()) {
       throw Exception("");
     }
@@ -347,7 +347,7 @@ void BuyBook::Execute(const std::vector<std::string> &args) {
   try {
     size_t pos;
     quantity = std::stoll(args[2], &pos);
-    expect(quantity).ge(1).le(2147683647);
+    expect(quantity).ge(1).le(2147483647);
     if(pos != args[2].length()) {
       throw Exception("");
     }
@@ -379,7 +379,7 @@ void ShowFinance::Execute(const std::vector<std::string> &args) {
       if(pos != args[2].length()) {
         throw Exception("");
       }
-      expect(count).ge(0).le(2147683647);
+      expect(count).ge(0).le(2147483647);
     } catch(...) {
       throw Exception("show finance : invalid count");
     }
