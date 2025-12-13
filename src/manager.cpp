@@ -154,6 +154,11 @@ SystemLog UserManager::UserAdd(std::string id, std::string pwd, int privilege, s
   } catch(...) {
     throw Exception("useradd : invalid name");
   }
+  try {
+    expect(privilege).toBeOneOf(VISITOR, CUSTOMER, STAFF);
+  } catch(...) {
+    throw Exception("useradd : invalid priviledge");
+  }
   auto user_index = id_user_[id];
   if(!user_index.empty()) {
     throw Exception("userAdd : the id is used");
