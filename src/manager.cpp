@@ -426,11 +426,16 @@ void BookManager::Show(const std::string show[]) {
       printf("%s\t%s\t%s\t%s\t%.2lf\t%d\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
     }
   } else {
-    auto PrintBook = [this](int index) {
+    bool have_book = 0;
+    auto PrintBook = [&, this](int index) {
+      have_book = 1;
       Book book = book_list_[index];
       printf("%s\t%s\t%s\t%s\t%.2lf\t%d\n", book.isbn_, book.bookname_, book.author_, book.keyword_, book.price_, book.quantity_);
     };
     isbn_book_.traverse(PrintBook);
+    if(!have_book) {
+      printf("\n");
+    }
   }
 }
 

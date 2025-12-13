@@ -376,20 +376,19 @@ void ShowFinance::Execute(const std::vector<std::string> &args) {
     return ;
   }
   if(args.size() == 3) {
-    int count;
+    long long count;
     try {
+      expect(args[2]).toBeLength(1, 10);
       size_t pos;
       count = std::stod(args[2], &pos);
       if(pos != args[2].length()) {
         throw Exception("");
       }
+      expect(count).ge(0).le(2147683647);
     } catch(...) {
-      throw Exception("show finance : count need to be num");
+      throw Exception("show finance : invalid count");
     }
-    if(count < 0) {
-      throw Exception("show finance : count need be postive");
-    }
-    log_manager_->ShowFinance(count);
+    log_manager_->ShowFinance(static_cast<int>(count));
     return ;
   }
   throw Exception("show finance : need 0 / 1 argument");
