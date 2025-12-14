@@ -1,5 +1,6 @@
 #include "manager.hpp"
 #include "config.hpp"
+#include "journal.hpp"
 #include "models.hpp"
 #include "utils.hpp"
 #include "unrollindex.hpp"
@@ -13,7 +14,7 @@
 #include <set>
 #include <algorithm>
 
-UserManager::UserManager():user_list_("user.dat"), id_user_("user_id.dat") {
+UserManager::UserManager(JournalManager &jm):user_list_(jm, "user.dat"), id_user_(jm, "user_id.dat") {
   int index;
   auto user_index = id_user_[std::string("virtual_visitor")];
   if(user_index.empty()) {
@@ -60,7 +61,7 @@ SystemLog UserManager::Login(std::string id, std::string pwd) {
   //std::cerr << user.userid_ << std::endl;
   Session session = GetTopSession();
   User current_user = user_list_[session.index_user_];
-
+  std::cerr << id << " " << user.password_ << " " << pwd << std::endl;
   if(pwd != "") {
     if (strcmp(pwd.c_str(), user.password_) == 0) {
       log_stack_.push_back(index);
@@ -220,7 +221,7 @@ void UserManager::SelectBook(size_t index) {
   log_stack_.back().index_book_ = index;
 }
 
-BookManager::BookManager():book_list_("book.dat"), isbn_book_("book_isbn.dat"), name_book_("book_name.dat"), author_book_("book_author.dat"), key_book_("book_key.dat") {}
+BookManager::BookManager(JournalManager &jm):book_list_(jm, "book.dat"), isbn_book_(jm, "book_isbn.dat"), name_book_(jm, "book_name.dat"), author_book_(jm, "book_author.dat"), key_book_(jm, "book_key.dat") {}
 
 int BookManager::UnrollIsbn(std::string isbn) {
   try {
@@ -467,7 +468,7 @@ SystemLog BookManager::Buy(std::string isbn, long long quantity) {
   return SystemLog("", "buy", isbn.c_str(), quantity, quantity * book.price_, "");
 }
 
-LogManager::LogManager():finance_log_("finance.log"), system_log("system.log") {
+LogManager::LogManager(JournalManager &jm):finance_log_(jm, "finance.log"), system_log(jm, "system.log") {
   if(finance_log_.size() == 0) {
     finance_log_.write(FinanceLog(0, 0));
   }

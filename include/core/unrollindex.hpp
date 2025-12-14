@@ -2,6 +2,7 @@
 #define UNROLLINDEX
 
 #include "config.hpp"
+#include "journal.hpp"
 #include "memoryriver.hpp"
 #include <algorithm>
 #include <cstdlib>
@@ -34,6 +35,7 @@ template<class Key, class Value>
 class UnrollIndex {
 using BlockType = Block<Key, Value>;
 private:
+  int first_block;
   MemoryRiver<BlockType> file_;
   void GetBlock(BlockType &block,const int index) {
     file_.read(block, index);
@@ -45,8 +47,7 @@ private:
     file_.Delete(index);
   }
   std::vector<Value> Find(const Key &key) {
-    int now;
-    file_.get_info(now, 1);
+    int now = first_block;
     BlockType block;
     for(; now != -1; now = block.next) {
       GetBlock(block, now);
@@ -122,14 +123,14 @@ private:
     file_.update(block, index);
   }
 public:
-  UnrollIndex(const std::string &file_name):file_(file_name) {
-    int head;
-    file_.get_info(head, 1);
+  UnrollIndex(JournalManager &jm, const std::string &file_name):file_(jm, file_name) {
+    file_.get_info(first_block, 1);
     //std::cerr << "head : " << head << std::endl;
-    if(head == -1) {
+    if(first_block == -1) {
       BlockType head;
       int index = file_.write(head);
-      file_.write_info(index, 1);
+      first_block = index;
+      file_.write_info(first_block, 1);
       //std::cerr << head.next << std::endl;
     }
   }
@@ -137,8 +138,7 @@ public:
     return Find(key);
   }
   void Insert(const Key &key, const Value &value) {
-    int now;
-    file_.get_info(now, 1);
+    int now = first_block;
     //std::cerr << now << std::endl;
     BlockType block;
     for(; now != -1; now = block.next) {
@@ -173,8 +173,7 @@ public:
     return list;
   }
   bool Delete(const Key &key, const Value &value) { // return 0 for {key, value} not exist
-    int now;
-    file_.get_info(now, 1);
+    int now = first_block;
     BlockType block;
     for(; now != -1; now = block.next) {
       GetBlock(block, now);

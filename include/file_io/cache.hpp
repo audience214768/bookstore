@@ -58,6 +58,15 @@ public:
       }
     }
   }
+  void Delete(const Key &key) {
+    for(auto it = cache.begin(); it != cache.end(); it++) {
+      if(it->key_ == key) {
+        cache.erase(it);
+        map.erase(key);
+        break;
+      }
+    }
+  }
 };
 
 #endif

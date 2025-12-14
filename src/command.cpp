@@ -1,5 +1,6 @@
 #include "command.hpp"
 #include "config.hpp"
+#include "journal.hpp"
 #include "manager.hpp"
 #include "models.hpp"
 #include "utils.hpp"
@@ -11,11 +12,13 @@
 UserManager *Command::user_manager_ = nullptr;
 BookManager *Command::book_manager_ = nullptr;
 LogManager *Command::log_manager_ = nullptr;
+JournalManager *Command::journal_manager_ = nullptr;
 
-void Command::init(UserManager *user_manager, BookManager *book_manager, LogManager *log_manager) {
+void Command::init(UserManager *user_manager, BookManager *book_manager, LogManager *log_manager, JournalManager *journal_manager) {
   user_manager_ = user_manager;
   book_manager_ = book_manager;
   log_manager_ = log_manager;
+  journal_manager_ = journal_manager;
 }
 
 void Command::run(const std::vector<std::string> &args) {
@@ -27,7 +30,9 @@ void Command::run(const std::vector<std::string> &args) {
        << " current_user : " << user.userid_ << " have " << user.privilege_;
     throw Exception(ss.str());
   }
+  journal_manager_->Ready();
   Execute(args);
+  journal_manager_->Finish();
 }
 
 const char *Exit::Name() const { return "exit"; }

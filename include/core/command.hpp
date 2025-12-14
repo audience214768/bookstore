@@ -1,6 +1,7 @@
 #ifndef COMMAND
 #define COMMAND
 
+#include "journal.hpp"
 #include "manager.hpp"
 #include <vector>
 #include <string>
@@ -10,8 +11,9 @@ protected:
   static UserManager *user_manager_;
   static BookManager *book_manager_;
   static LogManager *log_manager_;
+  static JournalManager * journal_manager_;
 public:
-  static void init(UserManager *, BookManager *, LogManager *);
+  static void init(UserManager *, BookManager *, LogManager *, JournalManager *);
   virtual const char *Name() const = 0;
   virtual int NeedPrivilege() const = 0;
   virtual void Execute(const std::vector<std::string> &) = 0;

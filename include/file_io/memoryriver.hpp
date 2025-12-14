@@ -18,23 +18,37 @@ template <class T, int info_len = 2> //info 1 : the first alloc block info 2 : t
 class MemoryRiver {
 private:
   /* your code here */
-  fstream file;
-  string file_name;
+  fstream file_;
+  string file_name_;
   int sizeofT = sizeof(T);
   Cache<int, T> cache;
+  JournalManager &jm_;
+  int free_head = -1;
+  int last_index = 0;
+  int file_id_;
 public:
   MemoryRiver() = default;
 
-  MemoryRiver(const string &file_name) : file_name(file_name) {
-    file.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
-    if(!file) {
-      file.open(file_name, std::ios::out | std::ios::binary);
+  MemoryRiver(JournalManager &jm, const string &file_name) : file_name_(file_name), jm_(jm) {
+    file_.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
+    if(!file_) {
+      file_.open(file_name, std::ios::out | std::ios::binary);
       int tmp = -1;
       for (int i = 0; i < info_len; ++i)
-        file.write(reinterpret_cast<char *>(&tmp), sizeof(int));
-      file.close();
-      file.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
+        file_.write(reinterpret_cast<char *>(&tmp), sizeof(int));
+      file_.close();
+      file_.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
+    } else {
+      get_info(free_head, 2);
     }
+    auto write = [this](int offset, int size, const char *data) {
+      file_.seekp(offset);
+      file_.write(data, size);
+    };
+    file_id_ = jm.Init(write);
+    file_.seekg(0, std::ios::end);
+    int offset = file_.tellg();
+    last_index = (offset - sizeof(int) * info_len) / sizeofT;
   }
 
   ~MemoryRiver() {
@@ -42,20 +56,19 @@ public:
     auto write = [this](const int &index, const T &data) {
       //std::cerr << index << std::endl;
       int offset = sizeofT * index + info_len * sizeof(int);
-      file.seekp(offset);
-      file.write(reinterpret_cast<const char *>(&data), sizeofT);
+      file_.seekp(offset);
+      file_.write(reinterpret_cast<const char *>(&data), sizeofT);
     };
     cache.FlushAll(write);
-    file.flush();
-    if(file.is_open()) {
-      file.close();
+    write_info(free_head, 2);
+    file_.flush();
+    if(file_.is_open()) {
+      file_.close();
     }
   }
 
   int size() {
-    file.seekg(0, std::ios::end);
-    int offset = file.tellg();
-    return (offset - info_len * sizeof(int)) / sizeofT;
+    return last_index;
   }
 
   // 读出第n个int的值赋给tmp，1_base
@@ -63,8 +76,8 @@ public:
     if (n > info_len)
       return;
     /* your code here */
-    file.seekg((n - 1) * sizeof(int));
-    file.read(reinterpret_cast<char *>(&tmp), sizeof(int));
+    file_.seekg((n - 1) * sizeof(int));
+    file_.read(reinterpret_cast<char *>(&tmp), sizeof(int));
   }
 
   // 将tmp写入第n个int的位置，1_base
@@ -72,8 +85,8 @@ public:
     if (n > info_len)
       return;
     /* your code here */
-    file.seekp((n - 1) * sizeof(int));
-    file.write(reinterpret_cast<char *>(&tmp), sizeof(int));
+    file_.seekp((n - 1) * sizeof(int));
+    file_.write(reinterpret_cast<char *>(&tmp), sizeof(int));
   }
 
   // 在文件合适位置写入类对象t，并返回写入的位置索引index
@@ -81,52 +94,45 @@ public:
   // 位置索引index可以取为对象写入的起始位置
   int write(const T &t) { 
     /* your code here */
-    int head;
-    get_info(head, 2);
-    if(head == -1) {
-      file.seekp(0, std::ios::end);
-      int size = file.tellp();
-      file.write(reinterpret_cast<const char *>(&t), sizeofT);
-      int index = (size - info_len * sizeof(int)) / sizeofT;
-      auto ret = cache.Put(index, t, 0);
+    if(free_head == -1) {
+      jm_.Write(file_id_, last_index * sizeofT + info_len * sizeof(int), sizeofT, reinterpret_cast<const char *>(&t));
+      auto ret = cache.Put(last_index, t, 1);
       if(ret.first && ret.second.is_dirty_) {
         size_t offset = sizeof(int) * info_len + sizeofT * ret.second.key_;
-        file.seekp(offset);
-        file.write(reinterpret_cast<const char *>(&ret.second.value_), sizeofT);
+        file_.seekp(offset);
+        file_.write(reinterpret_cast<const char *>(&ret.second.value_), sizeofT);
       }
-      return index;
+      return last_index++;
     }
-    size_t offset = head * sizeofT + info_len * sizeof(int);
-    file.seekp(offset);
+    size_t offset = free_head * sizeofT + info_len * sizeof(int);
+    T temp;
+    read(temp, free_head);
     int new_head;
-    file.read(reinterpret_cast<char *>(&new_head), sizeof(int));
-    write_info(new_head, 2);
-    int size = file.tellp();
-    file.seekp(offset);
-    file.write(reinterpret_cast<const char *>(&t), sizeofT);
-    auto ret = cache.Put(head, t, 0);
+    memcpy(&new_head, &temp, sizeof(int));
+    jm_.Write(file_id_, offset, sizeofT, reinterpret_cast<const char *>(&t));
+    auto ret = cache.Put(free_head, t, 1);
+    int index = free_head;
+    jm_.Write(file_id_, sizeof(int), sizeof(int), reinterpret_cast<const char *>(&new_head));
+    free_head = new_head;
     if(ret.first && ret.second.is_dirty_) {
       size_t offset = sizeof(int) * info_len + sizeofT * ret.second.key_;
-      file.seekp(offset);
-      file.write(reinterpret_cast<const char *>(&ret.second.value_), sizeofT);
+      file_.seekp(offset);
+      file_.write(reinterpret_cast<const char *>(&ret.second.value_), sizeofT);
     }
-    return head;
+    return index;
   }
 
   // 用t的值更新位置索引index对应的对象，保证调用的index都是由write函数产生
   void update(const T &t, int index) { 
     /* your code here */ 
     //std::cerr << index << std::endl;
+    jm_.Write(file_id_, sizeof(int) * info_len + sizeofT * index, sizeofT, reinterpret_cast<const char *>(&t));
     auto ret = cache.Put(index, t);
     if(ret.first && ret.second.is_dirty_) {
       size_t offset = sizeof(int) * info_len + sizeofT * ret.second.key_;
-      file.seekp(offset);
-      file.write(reinterpret_cast<const char *>(&ret.second.value_), sizeofT);
+      file_.seekp(offset);
+      file_.write(reinterpret_cast<const char *>(&ret.second.value_), sizeofT);
     }
-    /*
-    size_t offset = sizeof(int) * info_len + sizeofT * index;
-    file.seekp(offset);
-    file.write(reinterpret_cast<const char *>(&t), sizeofT);*/
   }
 
   // 读出位置索引index对应的T对象的值并赋值给t，保证调用的index都是由write函数产生
@@ -140,25 +146,24 @@ public:
     }
     //std::cerr << "cache miss" << std::endl;
     size_t offset = sizeof(int) * info_len + sizeofT * index;
-    file.seekg(offset);
-    file.read(reinterpret_cast<char *>(&t), sizeofT);
+    file_.seekg(offset);
+    file_.read(reinterpret_cast<char *>(&t), sizeofT);
     auto ret = cache.Put(index, t, false);
     if(ret.first && ret.second.is_dirty_) {
       size_t offset = sizeof(int) * info_len + sizeofT * ret.second.key_;
-      file.seekp(offset);
-      file.write(reinterpret_cast<const char *>(&ret.second.value_), sizeofT);
+      file_.seekp(offset);
+      file_.write(reinterpret_cast<const char *>(&ret.second.value_), sizeofT);
     }
   }
 
   // 删除位置索引index对应的对象(不涉及空间回收时，可忽略此函数)，保证调用的index都是由write函数产生
   void Delete(int index) { 
     /* your code here */ 
-    size_t offset = index * sizeofT + info_len * sizeof(int);
-    int head;
-    get_info(head, 2);
-    file.seekp(offset);
-    file.write(reinterpret_cast<char *>(&head), sizeof(int));
-    write_info(index, 2);
+    T temp;
+    memcpy(&temp, &free_head, sizeof(int));
+    update(temp, index);
+    jm_.Write(file_id_, sizeof(int), sizeof(int), reinterpret_cast<const char *>(&index));
+    free_head = index;
   }
   T operator[](int index) {
     T t;

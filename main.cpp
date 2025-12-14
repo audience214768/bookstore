@@ -64,12 +64,13 @@ std::unique_ptr<Command> CreatCommand(const std::vector<std::string> &args) {
 }
 
 int main() {
-  UserManager user_manager;
-  BookManager book_manager;
-  LogManager log_manager;
-  //JournalManager journal_manager("data/journal.log");
-  Command::init(&user_manager, &book_manager, &log_manager);
+  JournalManager journal_manager("journal.log");
+  UserManager user_manager(journal_manager);
+  BookManager book_manager(journal_manager);
+  LogManager log_manager(journal_manager);
+  Command::init(&user_manager, &book_manager, &log_manager, &journal_manager);
   //std::cerr << "finish init" << std::endl;
+  journal_manager.Recover();
   std::string command;
   while(std::getline(std::cin, command)) {
     std::vector<std::string> args;

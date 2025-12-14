@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include "journal.hpp"
 #include "models.hpp"
 #include "unrollindex.hpp"
 #include "memoryriver.hpp"
@@ -19,7 +20,7 @@ private:
   MemoryRiver<User> user_list_;
   UnrollIndex<FixedString<31>, int> id_user_;
 public:
-  UserManager();
+  UserManager(JournalManager &);
   const Session GetTopSession();
   User GetUser(size_t);
   SystemLog Login(std::string, std::string = "");
@@ -39,7 +40,7 @@ private:
   UnrollIndex<FixedString<61>, int> author_book_;
   UnrollIndex<FixedString<61>, int> key_book_;
 public:
-  BookManager();
+  BookManager(JournalManager &);
   const Book GetBook(size_t);
   int UnrollIsbn(std::string);
   SystemLog Buy(std::string, long long);
@@ -53,7 +54,7 @@ private:
   MemoryRiver<FinanceLog> finance_log_;
   MemoryRiver<SystemLog> system_log;
 public:
-  LogManager();
+  LogManager(JournalManager &);
   void ShowFinance(int = -1);
   void ReportFinance();
   void PrintStaff();
