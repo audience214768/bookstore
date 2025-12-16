@@ -207,7 +207,7 @@ void ImportBook::Execute(const std::vector<std::string> &args) {
   }
   SystemLog log = book_manager_->Import(session.index_book_, static_cast<int>(quantity));
   strcpy(log.userid_, user_manager_->GetUser(session.index_user_).userid_);
-  log.total_amount_ = total_cast;
+  log.total_amount_ = -total_cast;
   log_manager_->AddSystemLog(log);
   log_manager_->AddFinancialLog(-total_cast);
 }
@@ -406,5 +406,32 @@ const char *ShowLog::Name() const {return "log";}
 int ShowLog::NeedPrivilege() const {return ADMIN;}
 
 void ShowLog::Execute(const std::vector<std::string> &args) {
+  std::cerr << "log" << std::endl;
   log_manager_->PrintLog();
+}
+
+const char *ReportFinance::Name() const { return "report finance"; }
+
+int ReportFinance::NeedPrivilege() const { return ADMIN; }
+
+void ReportFinance::Execute(const std::vector<std::string> &args) {
+  //std::cerr << "Logout" << std::endl;
+  std::cerr << "report finance" << std::endl;
+  if(args.size() != 2) {
+    throw Exception("report finance : don't need argument");
+  }
+  log_manager_->ReportFinance();
+}
+
+const char *ReportEmployee::Name() const { return "report employee"; }
+
+int ReportEmployee::NeedPrivilege() const { return ADMIN; }
+
+void ReportEmployee::Execute(const std::vector<std::string> &args) {
+  //std::cerr << "Logout" << std::endl;
+  std::cerr << "report employee" << std::endl;
+  if(args.size() != 2) {
+    throw Exception("report finance : don't need argument");
+  }
+  log_manager_->PrintStaff(user_manager_);
 }

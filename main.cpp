@@ -2,7 +2,6 @@
 #include <memory>
 #include <sstream>
 #include <string>
-#include <filesystem>
 #include "command.hpp"
 #include "manager.hpp"
 #include "utils.hpp"
@@ -53,24 +52,29 @@ std::unique_ptr<Command> CreatCommand(const std::vector<std::string> &args) {
   if(type == "log") {
     return std::make_unique<ShowLog>();
   }
-  /*
-  if(type == "report finance") {
-    return std::make_unique<ReportFinance>();
+  if(type == "report") {
+    if(args[1] == "finance") {
+      return std::make_unique<ReportFinance>();
+    }
+    if(args[1] == "employee") {
+      return std::make_unique<ReportEmployee>();
+    }
   }
-  if(type == "report employee") {
-    return std::make_unique<ReportEmployee>();
-  }*/
+  std::cerr << type << std::endl;
   throw Exception("not implement this command");
 }
 
 int main() {
   JournalManager journal_manager("journal.log");
+  journal_manager.Ready();
   UserManager user_manager(journal_manager);
   BookManager book_manager(journal_manager);
   LogManager log_manager(journal_manager);
   Command::init(&user_manager, &book_manager, &log_manager, &journal_manager);
-  //std::cerr << "finish init" << std::endl;
+  journal_manager.Finish();
   journal_manager.Recover();
+  //std::cerr << "finish init" << std::endl;
+  
   std::string command;
   while(std::getline(std::cin, command)) {
     std::vector<std::string> args;

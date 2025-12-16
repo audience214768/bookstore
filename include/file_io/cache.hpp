@@ -2,7 +2,6 @@
 #define CACHE
 
 #include "config.hpp"
-#include <iostream>
 #include <functional>
 #include <list>
 #include <unordered_map>
@@ -66,6 +65,10 @@ public:
         break;
       }
     }
+  }
+  void Clear() {
+    cache.clear();
+    map.clear();
   }
 };
 

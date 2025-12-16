@@ -37,7 +37,7 @@ using BlockType = Block<Key, Value>;
 private:
   int first_block;
   MemoryRiver<BlockType> file_;
-  void GetBlock(BlockType &block,const int index) {
+  void GetBlock(BlockType &block, const int index) {
     file_.read(block, index);
   }
   int AddBlock(const BlockType &block) {
@@ -51,6 +51,7 @@ private:
     BlockType block;
     for(; now != -1; now = block.next) {
       GetBlock(block, now);
+      //std::cerr << "%%% " << block.count_ << std::endl;
       if(block.count_ > 0 && block.data[block.count_ - 1].key >= key) {
         break;
       }
@@ -107,7 +108,7 @@ private:
       std::cerr << block.data[i].key << " " << block.data[i].value << std::endl;
     }*/
   }
-  void UpdateBlock(BlockType &block,const int index) {
+  void UpdateBlock(BlockType &block, const int index) {
     if(block.count_ == BlockSize) {
       Split(block, index);
       return ;
@@ -120,6 +121,7 @@ private:
         return ;
       } 
     }
+    //std::cerr << block.count_ << " " << index << std::endl;
     file_.update(block, index);
   }
 public:
@@ -129,6 +131,7 @@ public:
     if(first_block == -1) {
       BlockType head;
       int index = file_.write(head);
+      //std::cerr << "check" << std::endl;
       first_block = index;
       file_.write_info(first_block, 1);
       //std::cerr << head.next << std::endl;
@@ -156,6 +159,7 @@ public:
     block.data[i].key = key;
     block.data[i].value = value;
     block.count_++;
+    //std::cerr << block.count_ << std::endl;
     UpdateBlock(block, now);
   }
   std::vector<Value> traverse(std::function<void(Value &)> callback) {

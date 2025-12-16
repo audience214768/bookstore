@@ -45,10 +45,18 @@ public:
       file_.seekp(offset);
       file_.write(data, size);
     };
-    file_id_ = jm.Init(write);
+    auto refresh = [this]() {
+      file_.seekg(0, std::ios::end);
+      int offset = file_.tellg();
+      last_index = (offset - sizeof(int) * info_len) / sizeofT;
+      cache.Clear();
+    };
+    file_id_ = jm.Init(write, refresh);
+    //std::cerr << file_name << " " << file_id_ << std::endl;
     file_.seekg(0, std::ios::end);
     int offset = file_.tellg();
     last_index = (offset - sizeof(int) * info_len) / sizeofT;
+    //std::cerr << last_index << std::endl;
   }
 
   ~MemoryRiver() {
@@ -59,7 +67,7 @@ public:
       file_.seekp(offset);
       file_.write(reinterpret_cast<const char *>(&data), sizeofT);
     };
-    cache.FlushAll(write);
+    //cache.FlushAll(write);
     write_info(free_head, 2);
     file_.flush();
     if(file_.is_open()) {
@@ -102,6 +110,7 @@ public:
         file_.seekp(offset);
         file_.write(reinterpret_cast<const char *>(&ret.second.value_), sizeofT);
       }
+      //std::cerr << last_index << std::endl;
       return last_index++;
     }
     size_t offset = free_head * sizeofT + info_len * sizeof(int);
@@ -109,6 +118,7 @@ public:
     read(temp, free_head);
     int new_head;
     memcpy(&new_head, &temp, sizeof(int));
+    //std::cerr << sizeofT << std::endl;
     jm_.Write(file_id_, offset, sizeofT, reinterpret_cast<const char *>(&t));
     auto ret = cache.Put(free_head, t, 1);
     int index = free_head;

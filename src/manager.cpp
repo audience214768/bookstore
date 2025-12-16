@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <set>
 #include <algorithm>
 
@@ -43,6 +44,11 @@ User UserManager::GetUser(size_t index) {
   return user_list_[index];
 }
 
+User UserManager::GetUser(std::string id) {
+  auto index = id_user_[id];
+  return user_list_[index[0]];
+}
+
 SystemLog UserManager::Login(std::string id, std::string pwd) {
   //std::cerr << id << std::endl;
   try {
@@ -61,7 +67,7 @@ SystemLog UserManager::Login(std::string id, std::string pwd) {
   //std::cerr << user.userid_ << std::endl;
   Session session = GetTopSession();
   User current_user = user_list_[session.index_user_];
-  std::cerr << id << " " << user.password_ << " " << pwd << std::endl;
+  //std::cerr << id << " " << user.password_ << " " << pwd << std::endl;
   if(pwd != "") {
     if (strcmp(pwd.c_str(), user.password_) == 0) {
       log_stack_.push_back(index);
@@ -234,6 +240,7 @@ int BookManager::UnrollIsbn(std::string isbn) {
     int index = book_list_.write(Book(isbn.c_str()));
     isbn_book_.Insert(isbn, index);
     return index;
+
   }
   else {
     return book_index[0];
@@ -347,9 +354,7 @@ SystemLog BookManager::Modify(size_t index, const std::string modify[]) {
       key_book_.Delete(key, index);
     }
     std::stringstream ss_new(new_keyword);
-    std::set<std::string> key_set;
     while (getline(ss_new, key, '|')) {
-      key_set.insert(key);
       key_book_.Insert(key, index);
     }
     strncpy(book.keyword_, new_keyword.c_str(), new_keyword.length());
@@ -511,4 +516,42 @@ void LogManager::PrintLog() {
     printf("%-10s %-20s %-10s %-10.2lf %s\n", log.userid_, log.action_, log.target_, log.total_amount_, log.info_);
   };
   system_log.tranverse(PrintLog);
+}
+
+void LogManager::ReportFinance() {
+  printf("%-10s %-10s %-10s %-10s %s\n", "User", "Action", "ISBN", "Quantity", "Total");
+  double total_amount = 0;
+  auto ReportFinance = [this](SystemLog &log) {
+    if(strcmp(log.action_, "buy") == 0 || strcmp(log.action_, "import") == 0) {
+      printf("%-10s %-20s %-10s %-10lld %-10.2lf\n", log.userid_, log.action_, log.target_, log.quantity_, log.total_amount_);
+    }
+  };
+  system_log.tranverse(ReportFinance);
+}
+
+void LogManager::PrintStaff(UserManager *user_manager) {
+  std::map<std::string, std::vector<SystemLog>> employee_log;
+  auto Employee_log = [&, this](SystemLog &log) {
+    if(log.userid_[0] == '\0') {
+      return ;
+    }
+    auto user = user_manager->GetUser(log.userid_);
+    //std::cerr << user.privilege_ << std::endl;
+    if(user.privilege_ >= 3) {
+      employee_log[user.userid_].push_back(log);
+    }
+  };
+  std::cerr << 111 << std::endl;
+  system_log.tranverse(Employee_log);
+  std::cerr << 111 << std::endl;
+  if(employee_log.empty()) {
+    return ;
+  }
+  printf("%-15s %-10s %-10s %s\n", "Action", "Target", "Amount", "Details");
+  for(auto data : employee_log) {
+    printf("================ Employee: %s ================\n", data.first.c_str());
+    for(auto log : data.second) {
+      printf("%-15s %-10s %-10.2lf %s\n", log.action_, log.target_, log.total_amount_, log.info_);
+    }
+  }
 }

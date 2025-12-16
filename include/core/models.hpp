@@ -42,7 +42,7 @@ struct SystemLog {
   char userid_[31];
   char action_[30];
   char target_[61];
-  int quantity_ = 0;
+  long long quantity_ = 0;
   double total_amount_ = 0;
   char info_[300];
 };

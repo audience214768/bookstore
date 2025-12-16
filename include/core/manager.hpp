@@ -23,6 +23,7 @@ public:
   UserManager(JournalManager &);
   const Session GetTopSession();
   User GetUser(size_t);
+  User GetUser(std::string);
   SystemLog Login(std::string, std::string = "");
   SystemLog Logout();
   SystemLog Register(std::string, std::string, std::string);
@@ -57,7 +58,7 @@ public:
   LogManager(JournalManager &);
   void ShowFinance(int = -1);
   void ReportFinance();
-  void PrintStaff();
+  void PrintStaff(UserManager *);
   void PrintLog();
   void AddFinancialLog(double);
   void AddSystemLog(SystemLog &);

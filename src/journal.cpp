@@ -1,8 +1,10 @@
 #include "journal.hpp"
 #include <fstream>
+#include <iostream>
 
 
 void JournalManager::AddLog(const JournalHeader &header, const char *data) {
+  //std::cerr << "write : " << header.type << std::endl;
   const char *ptr = reinterpret_cast<const char *>(&header);
   buffer_.insert(buffer_.end(), ptr, ptr + sizeofHead);
   if(data != nullptr) {
@@ -19,8 +21,9 @@ JournalManager::JournalManager(const std::string &file_name):file_name_(file_nam
   file_.close();
 }
 
-int JournalManager::Init(rawWrite func) {
-  file_map_.push_back(func);
+int JournalManager::Init(rawWrite fun1, reFresh fun2) {
+  file_map_.push_back(fun1);
+  fresh_list_.push_back(fun2);
   return file_map_.size() - 1;
 }
 
@@ -38,6 +41,7 @@ void JournalManager::Finish() {
   JournalHeader header = {FINISH};
   AddLog(header, nullptr);
   std::fstream file(file_name_, std::ios::out | std::ios::binary | std::ios::app);
+  //std::cerr << buffer_.data() << std::endl;
   file.write(buffer_.data(), buffer_.size());
   buffer_.clear();
   file.flush();
@@ -61,6 +65,7 @@ void JournalManager::Recover() {
     if(header.type == WRITE) {
       std::vector<char> data(header.data_size);
       file.read(data.data(), header.data_size);
+      //std::cerr << header.fileID << " " << header.offset << std::endl;
       buffer.push_back(Data{header.fileID, header.offset, header.data_size, data});
     }
     if(header.type == FINISH) {
@@ -72,8 +77,15 @@ void JournalManager::Recover() {
   }
   file.close();
   std::fstream claer_file(file_name_, std::ios::out | std::ios::trunc);
+  if(!buffer.empty()) {
+    dataloss = 1;
+    std::cerr << "something is lost" << std::endl;
+  }
   if(!dataloss) {
     std::cerr << "data is fine" << std::endl;
+  }
+  for(auto fun : fresh_list_) {
+    fun();
   }
 }
 
