@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -507,13 +508,15 @@ void LogManager::ShowFinance(int count) {
 }
 
 void LogManager::AddSystemLog(SystemLog &log) {
+  time_t now;
+  time(&now);
+  log.time = localtime(&now);
   system_log.write(log);
 }
-
 void LogManager::PrintLog() {
-  printf("%-10s %-20s %-10s %-10s %s\n", "User", "Action", "Target", "Money", "Details");
+  printf("%-19s %-10s %-20s %-10s %-10s %s\n", "Time", "User", "Action", "Target", "Money", "Details");
   auto PrintLog = [this](SystemLog &log) {
-    printf("%-10s %-20s %-10s %-10.2lf %s\n", log.userid_, log.action_, log.target_, log.total_amount_, log.info_);
+    printf("%04d-%02d-%02d %02d:%02d:%02d %-10s %-20s %-10s %-10.2lf %s\n", log.time->tm_year + 1910, log.time->tm_mon + 1, log.time->tm_mday, log.time->tm_hour, log.time->tm_min, log.time->tm_sec, log.userid_, log.action_, log.target_, log.total_amount_, log.info_);
   };
   system_log.tranverse(PrintLog);
 }
@@ -541,9 +544,9 @@ void LogManager::PrintStaff(UserManager *user_manager) {
       employee_log[user.userid_].push_back(log);
     }
   };
-  std::cerr << 111 << std::endl;
+  //std::cerr << 111 << std::endl;
   system_log.tranverse(Employee_log);
-  std::cerr << 111 << std::endl;
+  //std::cerr << 111 << std::endl;
   if(employee_log.empty()) {
     return ;
   }
