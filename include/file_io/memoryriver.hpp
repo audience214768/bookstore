@@ -67,7 +67,7 @@ public:
       file_.seekp(offset);
       file_.write(reinterpret_cast<const char *>(&data), sizeofT);
     };
-    //cache.FlushAll(write);
+    cache.FlushAll(write);
     write_info(free_head, 2);
     file_.flush();
     if(file_.is_open()) {

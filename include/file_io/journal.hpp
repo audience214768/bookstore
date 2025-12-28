@@ -14,6 +14,7 @@ private:
     int fileID;
     int offset;
     int data_size;
+    unsigned int checksum;
   };
   struct Data {
     int fileID;
