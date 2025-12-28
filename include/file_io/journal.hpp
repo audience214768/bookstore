@@ -15,6 +15,7 @@ private:
     int offset;
     int data_size;
     unsigned int checksum;
+    unsigned int magic = 0xDEADBEEF;
   };
   struct Data {
     int fileID;

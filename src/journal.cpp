@@ -214,6 +214,12 @@ void JournalManager::Recover() {
   while(file.peek() != EOF) {
     JournalHeader header;
     file.read(reinterpret_cast<char *>(&header), sizeofHead);
+    if(header.magic != 0xDEADBEEF) {
+      dataloss = 1;
+      std::cerr << "data is broken, the magic num is missing" << std::endl;
+      buffer.clear();
+      break;
+    }
     if(header.type == READY) {
       if(!buffer.empty()) {
         dataloss = 1;
