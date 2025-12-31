@@ -510,51 +510,80 @@ void LogManager::ShowFinance(int count) {
 void LogManager::AddSystemLog(SystemLog &log) {
   time_t now;
   time(&now);
-  log.time = localtime(&now);
+  log.time = now;
   system_log.write(log);
 }
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define BLUE "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN "\033[36m"
+#define BOLD "\033[1m"
+#define RESET "\033[0m"
+
 void LogManager::PrintLog() {
-  printf("%-19s %-10s %-20s %-10s %-10s %s\n", "Time", "User", "Action", "Target", "Money", "Details");
+  printf(BOLD "--------------------------------------------------\n");
+  printf(BLUE BOLD "%-19s %-20s %-20s %-20s %-10s %s" RESET "\n", "Time", "User", "Action", "Target", "Money", "Details");
+  
   auto PrintLog = [this](SystemLog &log) {
-    printf("%04d-%02d-%02d %02d:%02d:%02d %-10s %-20s %-10s %-10.2lf %s\n", log.time->tm_year + 1910, log.time->tm_mon + 1, log.time->tm_mday, log.time->tm_hour, log.time->tm_min, log.time->tm_sec, log.userid_, log.action_, log.target_, log.total_amount_, log.info_);
+    auto tm = localtime(&log.time);
+    const char* moneyColor = RESET;
+    if (log.total_amount_ > 0.001) moneyColor = GREEN;
+    else if (log.total_amount_ < -0.001) moneyColor = RED;
+    printf(CYAN "%04d-%02d-%02d %02d:%02d:%02d" RESET " " YELLOW "%-20s" RESET " " "%-20s" " " MAGENTA "%-20s" RESET " " "%s%-10.2lf" RESET " " "%s\n", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, log.userid_, log.action_, log.target_, moneyColor, log.total_amount_, log.info_);
   };
   system_log.tranverse(PrintLog);
+  printf(BOLD "--------------------------------------------------\n");
 }
 
 void LogManager::ReportFinance() {
-  printf("%-10s %-10s %-10s %-10s %s\n", "User", "Action", "ISBN", "Quantity", "Total");
-  double total_amount = 0;
-  auto ReportFinance = [this](SystemLog &log) {
-    if(strcmp(log.action_, "buy") == 0 || strcmp(log.action_, "import") == 0) {
-      printf("%-10s %-20s %-10s %-10lld %-10.2lf\n", log.userid_, log.action_, log.target_, log.quantity_, log.total_amount_);
+  printf(BOLD "--------------------------------------------------\n");
+  printf(BLUE BOLD "%-20s %-10s %-20s %-10s %s" RESET "\n", "User", "Action", "ISBN", "Quantity", "Total");
+  double total_sum = 0;
+  auto ReportFinance = [&, this](SystemLog &log) {
+    bool is_buy = (strcmp(log.action_, "buy") == 0);
+    bool is_import = (strcmp(log.action_, "import") == 0);
+    if(is_buy || is_import) {
+      double val = log.total_amount_;
+      if (is_import) val = -std::abs(val); else val = std::abs(val);
+      total_sum += val;
+      const char* color = is_buy ? GREEN : RED;
+      printf(YELLOW "%-20s" RESET " " "%s%-10s" RESET " " MAGENTA "%-20s" RESET " " BOLD "%-10lld" RESET " " "%s%-10.2lf" RESET "\n", log.userid_, color, log.action_, log.target_, log.quantity_, color, val);
     }
   };
   system_log.tranverse(ReportFinance);
+  printf("Net Profit: %s%.2lf" RESET "\n", 
+         (total_sum >= 0 ? GREEN : RED), total_sum);
+  printf(BOLD "--------------------------------------------------\n");
 }
 
 void LogManager::PrintStaff(UserManager *user_manager) {
   std::map<std::string, std::vector<SystemLog>> employee_log;
+  printf(BOLD "--------------------------------------------------\n");
   auto Employee_log = [&, this](SystemLog &log) {
-    if(log.userid_[0] == '\0') {
-      return ;
-    }
-    auto user = user_manager->GetUser(log.userid_);
-    //std::cerr << user.privilege_ << std::endl;
-    if(user.privilege_ >= 3) {
-      employee_log[user.userid_].push_back(log);
+    if(log.userid_[0] == '\0') return;
+    try {
+        auto user = user_manager->GetUser(log.userid_);
+        if(user.privilege_ >= 3) {
+            employee_log[user.userid_].push_back(log);
+        }
+    } catch (...) {
+        return;
     }
   };
-  //std::cerr << 111 << std::endl;
   system_log.tranverse(Employee_log);
-  //std::cerr << 111 << std::endl;
-  if(employee_log.empty()) {
-    return ;
-  }
-  printf("%-15s %-10s %-10s %s\n", "Action", "Target", "Amount", "Details");
+  if(employee_log.empty()) return ;
+  printf(BLUE BOLD "%-15s %-20s %-10s %s" RESET "\n", "Action", "Target", "Amount", "Details");
   for(auto data : employee_log) {
-    printf("================ Employee: %s ================\n", data.first.c_str());
+    printf(CYAN BOLD "\n================ Employee: %s ================" RESET "\n", data.first.c_str());
+    
     for(auto log : data.second) {
-      printf("%-15s %-10s %-10.2lf %s\n", log.action_, log.target_, log.total_amount_, log.info_);
+      const char* color = RESET;
+      if (log.total_amount_ > 1e-6) color = GREEN;
+      else if (log.total_amount_ < -1e-6) color = RED;
+      printf("%-15s " MAGENTA "%-20s" RESET " ""%s%-10.2lf" RESET " ""%s\n", log.action_, log.target_, color, log.total_amount_, log.info_);
     }
   }
+  printf(BOLD "--------------------------------------------------\n");
 }

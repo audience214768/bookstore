@@ -416,7 +416,7 @@ int ReportFinance::NeedPrivilege() const { return ADMIN; }
 
 void ReportFinance::Execute(const std::vector<std::string> &args) {
   //std::cerr << "Logout" << std::endl;
-  std::cerr << "report finance" << std::endl;
+  //std::cerr << "report finance" << std::endl;
   if(args.size() != 2) {
     throw Exception("report finance : don't need argument");
   }
@@ -429,7 +429,7 @@ int ReportEmployee::NeedPrivilege() const { return ADMIN; }
 
 void ReportEmployee::Execute(const std::vector<std::string> &args) {
   //std::cerr << "Logout" << std::endl;
-  std::cerr << "report employee" << std::endl;
+  //std::cerr << "report employee" << std::endl;
   if(args.size() != 2) {
     throw Exception("report finance : don't need argument");
   }

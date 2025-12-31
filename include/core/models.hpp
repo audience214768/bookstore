@@ -46,7 +46,7 @@ struct SystemLog {
   long long quantity_ = 0;
   double total_amount_ = 0;
   char info_[300];
-  tm *time;
+  time_t time;
 };
 
 template<int len = 1>
